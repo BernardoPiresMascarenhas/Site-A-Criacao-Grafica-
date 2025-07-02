@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Aumenta o espaçamento dos pontinhos abaixo da imagem */
+.swiper-pagination {
+  bottom: -20px !important;
+}
+
+/* Ajusta o espaçamento dos pontinhos de paginação */
+.swiper-pagination {
+  bottom: -20px !important;
+}
+
+/* Centraliza o botão no meio verticalmente */
+.swiper-button-next,
+.swiper-button-prev {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Estiliza as setas: cor roxa e tamanho menor */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 20px;
+  color: #007AFF !important; /* ← Aqui define a cor da seta */
+}
+
+/* Estilo para os NOVOS botões de navegação customizados */
+
+.hero-swiper-button-next,
+.hero-swiper-button-prev {
+  /* Posicionamento */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  cursor: pointer;
+
+  /* Estilo do Círculo */
+  width: 50px;
+  height: 55px;
+  background-color: rgba(0, 0, 0, 0.25); /* Fundo cinza semi-transparente */
+  border-radius: 50%; /* Formato de círculo */
+  
+  /* Estilo do ícone (SVG) */
+  color: white; /* Cor da seta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Efeitos */
+  opacity: 0.7;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+/* Posição específica de cada botão */
+.hero-swiper-button-prev {
+  left: 3rem; /* Mais próximo do centro */
+}
+
+.hero-swiper-button-next {
+  right: 3rem; /* Mais próximo do centro */
+}
+
+/* Efeito ao passar o mouse */
+.hero-swiper-button-prev:hover,
+.hero-swiper-button-next:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Esconde as setas padrão do Swiper, por garantia */
+.swiper-button-next, .swiper-button-prev {
+    display: none !important;
+}
