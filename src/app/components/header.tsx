@@ -31,7 +31,7 @@ const Header = () => {
         // A tag <nav> se torna o container relativo para o menu mobile absoluto
         <nav className="bg-[url('/header-background.png')] bg-cover bg-no-repeat bg-center shadow-sm sticky top-0 z-50 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-28 items-center">
+                <div className="flex justify-between h-36 items-center">
                     <div className="flex items-center">
                         {/* Logo */}
                         <a

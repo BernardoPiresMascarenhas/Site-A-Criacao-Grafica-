@@ -14,30 +14,43 @@ import 'swiper/css/effect-fade';
 
 const slidesData = [
   {
-    image: '/hero1.png', 
+    image: '/hero1.png',
     title: 'Impressão Digital de Alta Qualidade',
     subtitle: 'Cartões, folders e flyers que impressionam na primeira vista.',
     buttonText: 'Solicitar Orçamento',
+    buttonLink: '#orcamento',
   },
   {
-    image: '/hero6.png', 
+    image: '/hero6.png',
     title: 'Comunicação Visual Sob Medida',
     subtitle: 'Crie banners, adesivos e placas que fortalecem sua marca.',
     buttonText: 'Conheça Nossos Serviços',
+    buttonLink: '#services',
   },
   {
-    image: '/hero5.png', 
+    image: '/hero5.png',
     title: 'Brindes Personalizados e Criativos',
     subtitle: 'Agendas, canecas e calendários que seus clientes vão amar.',
     buttonText: 'Ver Opções',
+    buttonLink: '#produtos',
   },
 ];
 
 const Hero = () => {
+  // PASSO 2: Crie a função de rolagem aqui
+  const scrollToSection = (sectionId) => {
+    const id = sectionId.substring(1);
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   return (
-    // O container principal não muda
     <div id="home" className="relative w-full h-[75vh] text-white">
-      {/* Container para o Swiper e para os botões customizados */}
       <div className="relative w-full h-full">
         <Swiper
           modules={[Navigation, Pagination, Autoplay, EffectFade]}
@@ -50,7 +63,6 @@ const Hero = () => {
             disableOnInteraction: false,
           }}
           pagination={{ clickable: true }}
-          // NOVO: Dizendo ao Swiper para usar nossos botões customizados
           navigation={{
             nextEl: '.hero-swiper-button-next',
             prevEl: '.hero-swiper-button-prev',
@@ -59,7 +71,6 @@ const Hero = () => {
         >
           {slidesData.map((slide, index) => (
             <SwiperSlide key={index}>
-              {/* O conteúdo do slide continua o mesmo */}
               <div className="relative w-full h-full">
                 <Image
                   src={slide.image}
@@ -76,7 +87,11 @@ const Hero = () => {
                     <p className="mt-4 text-lg sm:text-xl drop-shadow-md">
                       {slide.subtitle}
                     </p>
-                    <button className="mt-8 bg-yellow-400 text-[#262A2B] font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105">
+                    {/* PASSO 3: Adicione o onClick ao botão */}
+                    <button
+                      onClick={() => scrollToSection(slide.buttonLink)}
+                      className="mt-8 bg-yellow-400 text-[#262A2B] font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105"
+                    >
                       {slide.buttonText}
                     </button>
                   </div>
@@ -86,7 +101,7 @@ const Hero = () => {
           ))}
         </Swiper>
 
-        {/* NOVO: Nossos botões de seta customizados (fora do Swiper, mas dentro do container) */}
+        {/* Seus botões de navegação customizados */}
         <div className="hero-swiper-button-prev">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>

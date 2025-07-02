@@ -1,33 +1,55 @@
+"use client";
 
 import React from "react";
+import Image from "next/image";
+import { motion } from "framer-motion"; 
+import { Service } from '@/data/servicesData';
+
+
+const cardVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.8, 
+      ease: "easeOut" 
+    },
+  },
+};
 
 interface ServiceCardProps {
-  title: string;
-  description: string;
-  wpplink: string;
-  img: string;
-  openModal: (title: string, description: string, wpplink: string, img: string, directToCatalog?: boolean) => void;
-  directToCatalog?: boolean; // MUDANÇA: Adicionada nova prop opcional
+  service: Service;
+  onCardClick: (service: Service) => void;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({
-  title,
-  description,
-  openModal,
-  wpplink,
-  img,
-  directToCatalog, // MUDANÇA: Recebendo a nova prop
-}) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCardClick }) => {
   return (
-    <div
-      className="bg-gradient-to-br from-white to-purple-50 p-6 rounded-2xl shadow-lg border border-transparent hover:border-purple-300 transition-all duration-300 transform hover:scale-105 cursor-pointer"
-      // MUDANÇA: Passando a prop para a função openModal
-      onClick={() => openModal(title, description, wpplink, img, directToCatalog)}
+    
+    <motion.div
+      className="group cursor-pointer rounded-lg overflow-hidden bg-white shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-yellow-400/60"
+      onClick={() => onCardClick(service)}
+      variants={cardVariants} 
     >
-      
-      <h3 className="text-xl font-bold text-purple-800 mb-2">{title}</h3>
-      <p className="text-gray-600">Clique para saber mais!</p>
-    </div>
+      {/* O resto do seu código continua exatamente igual */}
+      <div className="relative w-full h-48">
+        <Image
+          src={service.coverImage}
+          alt={`Imagem de capa para ${service.title}`}
+          layout="fill"
+          objectFit="cover"
+          className="transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+
+      <div className="p-5">
+        <h3 className="text-xl font-bold text-gray-800">{service.title}</h3>
+        <p className="mt-2 text-sm text-gray-600">{service.description}</p>
+        <div className="mt-4 text-yellow-500 font-semibold group-hover:text-yellow-600 transition-colors">
+            Ver portfólio →
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

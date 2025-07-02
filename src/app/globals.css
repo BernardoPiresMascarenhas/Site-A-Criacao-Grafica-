@@ -20,75 +20,66 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Aumenta o espaçamento dos pontinhos abaixo da imagem */
-.swiper-pagination {
-  bottom: -20px !important;
+/* === ESTILOS GERAIS DO SWIPER === */
+
+/* Estilo das bolinhas de paginação */
+.swiper-pagination-bullet {
+    background: #ffffff !important;
+    opacity: 0.7;
+}
+.swiper-pagination-bullet-active {
+    background: #facc15 !important; /* Amarelo */
+    opacity: 1;
 }
 
-/* Ajusta o espaçamento dos pontinhos de paginação */
-.swiper-pagination {
-  bottom: -20px !important;
-}
 
-/* Centraliza o botão no meio verticalmente */
-.swiper-button-next,
-.swiper-button-prev {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Estiliza as setas: cor roxa e tamanho menor */
-.swiper-button-next::after,
-.swiper-button-prev::after {
-  font-size: 20px;
-  color: #007AFF !important; /* ← Aqui define a cor da seta */
-}
-
-/* Estilo para os NOVOS botões de navegação customizados */
-
+/* === ESTILO COMPARTILHADO PARA TODOS OS BOTÕES CUSTOMIZADOS === */
+/* Esta regra aplica o mesmo visual para os botões do Hero e do Modal */
 .hero-swiper-button-next,
-.hero-swiper-button-prev {
-  /* Posicionamento */
+.hero-swiper-button-prev,
+.modal-swiper-button-next,
+.modal-swiper-button-prev {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 20;
   cursor: pointer;
-
-  /* Estilo do Círculo */
   width: 50px;
   height: 55px;
-  background-color: rgba(0, 0, 0, 0.25); /* Fundo cinza semi-transparente */
-  border-radius: 50%; /* Formato de círculo */
-  
-  /* Estilo do ícone (SVG) */
-  color: white; /* Cor da seta */
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* Efeitos */
   opacity: 0.7;
   transition: opacity 0.3s ease, background-color 0.3s ease;
 }
 
-/* Posição específica de cada botão */
-.hero-swiper-button-prev {
-  left: 3rem; /* Mais próximo do centro */
-}
-
-.hero-swiper-button-next {
-  right: 3rem; /* Mais próximo do centro */
-}
-
-/* Efeito ao passar o mouse */
+/* Efeito de hover compartilhado */
 .hero-swiper-button-prev:hover,
-.hero-swiper-button-next:hover {
+.hero-swiper-button-next:hover,
+.modal-swiper-button-prev:hover,
+.modal-swiper-button-next:hover {
   opacity: 1;
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Esconde as setas padrão do Swiper, por garantia */
-.swiper-button-next, .swiper-button-prev {
-    display: none !important;
+
+/* === POSICIONAMENTO ESPECÍFICO DE CADA CARROSSEL === */
+
+/* Posição dos botões do HERO */
+.hero-swiper-button-prev {
+  left: 3rem;
+}
+.hero-swiper-button-next {
+  right: 3rem;
+}
+
+/* Posição dos botões do MODAL */
+.modal-swiper-button-prev {
+  left: 1rem;
+}
+.modal-swiper-button-next {
+  right: 1rem;
 }
