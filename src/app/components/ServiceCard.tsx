@@ -2,11 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion"; 
+import { motion, Variants } from "framer-motion"; 
 import { Service } from '@/data/servicesData';
 
-
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -25,7 +24,6 @@ interface ServiceCardProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCardClick }) => {
   return (
-    
     <motion.div
       className="group cursor-pointer rounded-lg overflow-hidden bg-white shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-yellow-400/60"
       onClick={() => onCardClick(service)}
@@ -40,7 +38,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCardClick }) => {
           className="transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-
       <div className="p-5">
         <h3 className="text-xl font-bold text-gray-800">{service.title}</h3>
         <p className="mt-2 text-sm text-gray-600">{service.description}</p>

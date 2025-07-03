@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from "next/image";
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
@@ -35,7 +35,7 @@ const slidesData = [
   },
 ];
 
-const textContainerVariants = {
+const textContainerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -43,11 +43,10 @@ const textContainerVariants = {
   },
 };
 
-const textItemVariants = {
+const textItemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.9, ease: "easeOut" }},
 };
-
 
 const Hero = () => {
   const scrollToSection = (sectionId: string) => {

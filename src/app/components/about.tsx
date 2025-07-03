@@ -1,11 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import Image from "next/image";
 import { CheckCircle, Zap } from "lucide-react";
 
-
-const textContainerVariants = {
+const textContainerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -15,21 +14,16 @@ const textContainerVariants = {
   },
 };
 
-const textItemVariants = {
+const textItemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
 };
-
 
 const AboutUs = () => {
   return (
     <section id="about" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-          
           <motion.div
             className="flex flex-col justify-center"
             variants={textContainerVariants}
@@ -51,7 +45,6 @@ const AboutUs = () => {
               Fundada em 2003 em Belo Horizonte, a A Criação Gráfica vem se consolidando a cada ano, tornando-se a melhor opção para agências de publicidade e empresas que buscam compromisso, qualidade e excelência.
             </motion.p>
             
-            
             <motion.div variants={textItemVariants} className="mb-8">
               <div className="flex items-center mb-2">
                 <CheckCircle className="w-6 h-6 text-yellow-500 mr-3" />
@@ -63,7 +56,6 @@ const AboutUs = () => {
                 A escolha da melhor empresa de impressão em Belo Horizonte é essencial para garantir resultados de alta qualidade e atender às suas necessidades específicas.
               </p>
             </motion.div>
-            
             
             <motion.div variants={textItemVariants}>
               <div className="flex items-center mb-2">
@@ -78,7 +70,6 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
 
-          
           <motion.div 
             className="grid grid-cols-2 grid-rows-2 gap-4 h-[500px]"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -86,7 +77,6 @@ const AboutUs = () => {
             transition={{ duration: 0.9, ease: "easeOut" }}
             viewport={{ once: true }}
           >
-            {/* Imagem Principal (maior) */}
             <div className="col-span-2 row-span-1 relative">
               <Image
                 src="/sobrenos.png" 
@@ -96,7 +86,6 @@ const AboutUs = () => {
                 className="rounded-2xl shadow-2xl border-4 border-yellow-200"
               />
             </div>
-            {/* Imagem Secundária 1 */}
             <div className="col-span-1 row-span-1 relative">
               <Image
                 src="/sobrenos2.png" 
@@ -106,7 +95,6 @@ const AboutUs = () => {
                 className="rounded-2xl shadow-2xl border-4 border-yellow-200"
               />
             </div>
-            {/* Imagem Secundária 2 */}
             <div className="col-span-1 row-span-1 relative">
               <Image
                 src="/sobrenos3.png" 
@@ -117,10 +105,8 @@ const AboutUs = () => {
               />
             </div>
           </motion.div>
-
         </div>
 
-        {/* Parágrafo final, ocupando a largura total */}
         <motion.div
           className="mt-20 max-w-4xl mx-auto text-center"
           initial={{ opacity: 0 }}
@@ -132,7 +118,6 @@ const AboutUs = () => {
             A Acriação Gráfica desenvolve suas atividades com excelência tecnológica, visando à satisfação de seus clientes e a segurança dos funcionários. Quando se trata de impressão gráfica em Belo Horizonte, nossa empresa se destaca como a melhor opção. Oferecemos serviços exclusivos e de alta qualidade que irão impressioná-lo. Com uma equipe altamente qualificada, equipamentos de última geração e uma variedade de opções de acabamento e personalização, estamos prontos para atender a todas as suas necessidades de impressão.
           </p>
         </motion.div>
-        
       </div>
     </section>
   );
