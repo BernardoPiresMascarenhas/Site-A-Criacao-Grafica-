@@ -18,7 +18,7 @@ const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: stri
         e.preventDefault();
         const element = document.getElementById(sectionId);
         if (element) {
-            const headerOffset = 112; // Altura do seu header
+            const headerOffset = 112; 
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -38,7 +38,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowPromo(true); 
-    }, 3000);
+    }, 7000);
 
     return () => clearTimeout(timer); 
   }, []);
@@ -70,7 +70,7 @@ function App() {
           className="fixed bottom-4 left-8 p-2 rounded-full hover:scale-110 transition-transform duration-300 z-50 sm:left-8 sm:p-2 md:left-8 md:p-2 xs:left-4 xs:p-1" // 'xs' aqui é só um exemplo, veja abaixo como fazer
         >
           <Image
-            src="/promo-icon.png"
+            src="/promo.png"
             alt="Promoção"
             width={48} 
             height={48}

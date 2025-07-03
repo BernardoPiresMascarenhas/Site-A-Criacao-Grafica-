@@ -1,21 +1,21 @@
-// Interface para um item individual do portfólio
+
 export interface PortfolioItem {
   image: string;
   title: string;
   description: string;
 }
 
-// Interface para o Serviço principal
+
 export interface Service {
   id: number;
   title: string;
-  description: string; // Descrição que aparece no card
-  coverImage: string; // Imagem de capa do card
-  portfolioItems: PortfolioItem[]; // O portfólio de cada serviço
+  description: string; 
+  coverImage: string; 
+  portfolioItems: PortfolioItem[]; 
   wpplink: string;
 }
 
-// Seus dados, agora com exemplos de uma gráfica
+
 export const servicesData: Service[] = [
   {
     id: 1,
@@ -273,5 +273,4 @@ export const servicesData: Service[] = [
       }
     ]
   },
-  // ... Adicione seus outros 10 serviços aqui, seguindo a mesma estrutura
 ];

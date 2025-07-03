@@ -18,7 +18,6 @@ const PromoModal = ({ onClose, onWhatsApp }: PromoModalProps) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* AJUSTE 1: Diminuí a largura máxima para 'sm' e a altura máxima para 85vh */}
         <motion.div
           className="relative bg-white rounded-3xl shadow-2xl border border-purple-300 overflow-y-auto max-h-[85vh] w-full max-w-sm p-6"
           initial={{ y: -40, opacity: 0, scale: 0.95 }}
@@ -36,12 +35,12 @@ const PromoModal = ({ onClose, onWhatsApp }: PromoModalProps) => {
 
           {/* Título animado */}
           <motion.h2
-            className="text-center text-xl font-bold text-purple-700 mb-4"
+            className="text-center text-xl font-bold text-yellow-300 mb-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            🎉 Promoção Especial! 🎉
+            🔥 Promoção Especial! 🔥
           </motion.h2>
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,8 +54,7 @@ const PromoModal = ({ onClose, onWhatsApp }: PromoModalProps) => {
             <motion.img
               src="/promocao.png"
               alt="Promoção"
-              // AJUSTE 2: Diminuí a altura máxima da imagem para 45vh
-              className="rounded-2xl shadow-xl border-4 border-purple-200 transition duration-300 w-auto max-h-[45vh]"
+              className="rounded-2xl shadow-xl border-4 border-yellow-200 transition duration-300 w-auto max-h-[45vh]"
               whileHover={{ scale: 1.05 }}
               />
           </motion.div>
@@ -64,7 +62,7 @@ const PromoModal = ({ onClose, onWhatsApp }: PromoModalProps) => {
           {/* Botão WhatsApp */}
           <motion.button
             onClick={onWhatsApp}
-            className="relative w-full py-3 text-white text-lg font-semibold rounded-xl bg-gradient-to-r from-green-500 via-green-400 to-green-600 hover:scale-105 transition-transform duration-300 shadow-lg overflow-hidden mt-6"
+            className="relative w-full py-3 text-white text-lg font-semibold rounded-xl bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 hover:scale-105 transition-transform duration-300 shadow-lg overflow-hidden mt-6"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

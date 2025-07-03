@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
-      subject: "Novo Agendamento",
+      subject: "Nova Mensagem de Cliente",
       text: `Nome: ${nome}\nEmail: ${email}\nTelefone de contato: ${numero}\nMensagem: ${mensagem}`,
     };
 

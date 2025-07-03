@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from 'react'; // 1. Importar o useState
+import { useState } from 'react'; 
 import { InstagramLogo, FacebookLogo, WhatsappLogo, List, X } from "@phosphor-icons/react"; 
 import Image from "next/image";
 
 const Header = () => {
-    // 3. Adicionar estado para controlar a visibilidade do menu mobile
+   
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
         e.preventDefault();
         const element = document.getElementById(sectionId);
         if (element) {
-            const headerOffset = 112; // Altura do seu header
+            const headerOffset = 112; 
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -21,14 +21,13 @@ const Header = () => {
                 behavior: 'smooth'
             });
         }
-        // Fecha o menu mobile após clicar em um link
+        
         if (isMenuOpen) {
             setIsMenuOpen(false);
         }
     };
 
     return (
-        // A tag <nav> se torna o container relativo para o menu mobile absoluto
         <nav className="bg-[url('/header-background.png')] bg-cover bg-no-repeat bg-center shadow-sm sticky top-0 z-50 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-36 items-center">
@@ -37,15 +36,16 @@ const Header = () => {
                         <a
                             href="#home"
                             onClick={(e) => scrollToSection(e, "home")}
-                            className="text-gray-700 hover:text-purple-600"
                         >
-                            <Image
-                                src="/logo.png"
-                                alt="Logo Império do Pets"
-                                width={350}
-                                height={350}
-                                className="transition-transform duration-300 ease-in-out hover:scale-110"
-                            />
+                            <div className="relative w-[220px] md:w-[330px] aspect-square transition-all duration-300">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Logo A Criação Gráfica" 
+                                    layout="fill"
+                                    objectFit="contain"
+                                    className="transition-transform duration-300 ease-in-out hover:scale-110"
+                                />
+                            </div>
                         </a>
                     </div>
 
@@ -54,7 +54,7 @@ const Header = () => {
                         <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-[#ECE537]">Home</a>
                         <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-[#ECE537]">Serviços</a>
                         <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-[#ECE537]">Sobre</a>
-                        <a href="#gallery" onClick={(e) => scrollToSection(e, "gallery")} className="text-gray-600 hover:text-[#ECE537] transition-colors">Galeria</a>
+                        <a href="#cliente" onClick={(e) => scrollToSection(e, "cliente")} className="text-gray-600 hover:text-[#ECE537] transition-colors">Clientes</a>
                         <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-[#ECE537]">Contato</a>
                         <a href="https://www.instagram.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
                             <InstagramLogo className="w-6 h-6 text-yellow-400" />
@@ -70,14 +70,14 @@ const Header = () => {
                     {/* 4. Botão do Menu Hambúrguer - Visível apenas em telas menores */}
                     <div className="md:hidden flex items-center">
                         <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)} // Alterna o estado do menu
-                            className="text-purple-600 hover:text-purple-800 focus:outline-none"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                            className="text-yellow-300 hover:text-yellow-300 focus:outline-none"
                             aria-label="Abrir menu"
                         >
                             {isMenuOpen ? (
-                                <X size={32} /> // Ícone de "X" quando o menu está aberto
+                                <X size={32} /> 
                             ) : (
-                                <List size={32} /> // Ícone de "hambúrguer" quando fechado
+                                <List size={32} /> 
                             )}
                         </button>
                     </div>
@@ -89,11 +89,11 @@ const Header = () => {
             {isMenuOpen && (
                 <div className="md:hidden bg-white/95 backdrop-blur-sm absolute top-full left-0 w-full shadow-lg">
                     <div className="flex flex-col items-center space-y-4 py-8 text-lg font-semibold">
-                        <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-purple-600">Home</a>
-                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-purple-600">Serviços</a>
-                        <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-purple-600">Sobre</a>
-                        <a href="#gallery" onClick={(e) => scrollToSection(e, "gallery")} className="text-gray-600 hover:text-purple-600 transition-colors">Galeria</a>
-                        <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-purple-600">Contato</a>
+                        <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-yellow-300">Home</a>
+                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-yellow-300">Serviços</a>
+                        <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-yellow-300">Sobre</a>
+                        <a href="#cliente" onClick={(e) => scrollToSection(e, "cliente")} className="text-gray-600 hover:text-yellow-300 transition-colors">Clientes</a>
+                        <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-yellow-300">Contato</a>
                         
                         {/* Ícones de redes sociais no menu mobile */}
                         <div className="flex space-x-6 pt-4">

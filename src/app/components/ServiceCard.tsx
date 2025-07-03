@@ -31,7 +31,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCardClick }) => {
       onClick={() => onCardClick(service)}
       variants={cardVariants} 
     >
-      {/* O resto do seu código continua exatamente igual */}
       <div className="relative w-full h-48">
         <Image
           src={service.coverImage}

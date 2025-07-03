@@ -33,6 +33,9 @@ body {
 }
 
 
+/* DENTRO DE src/app/globals.css */
+
+
 /* === ESTILO COMPARTILHADO PARA TODOS OS BOTÕES CUSTOMIZADOS === */
 /* Esta regra aplica o mesmo visual para os botões do Hero e do Modal */
 .hero-swiper-button-next,
@@ -46,23 +49,28 @@ body {
   cursor: pointer;
   width: 50px;
   height: 55px;
-  background-color: rgba(0, 0, 0, 0.25);
+  
+  
+  background-color: rgba(0, 0, 0, 0.4); /* Fundo um pouco mais escuro para melhor visibilidade */
+  
   border-radius: 50%;
-  color: white;
+  
+  color: white; 
+  
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.7;
-  transition: opacity 0.3s ease, background-color 0.3s ease;
+  
+  /* A propriedade 'opacity' foi removida para que a seta não fique transparente */
+  transition: background-color 0.3s ease; /* A transição agora é só na cor de fundo */
 }
 
-/* Efeito de hover compartilhado */
+/* Efeito de hover compartilhado (agora só muda a cor de fundo) */
 .hero-swiper-button-prev:hover,
 .hero-swiper-button-next:hover,
 .modal-swiper-button-prev:hover,
 .modal-swiper-button-next:hover {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo fica mais escuro no hover */
 }
 
 
