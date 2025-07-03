@@ -58,14 +58,14 @@ const AboutUs = () => {
               alt="Cachorro e gato sorrindo"
               width={400}
               height={400}
-              className="rounded-2xl shadow-2xl border-4 border-purple-200 object-cover"
+              className="rounded-2xl shadow-2xl border-4 border-yellow-200 object-cover"
             />
           </motion.div>
 
           {/* Título e textos à direita */}
           <div className="flex flex-col justify-center">
             <motion.h2
-              className="text-4xl font-extrabold text-purple-700 mb-4"
+              className="text-4xl font-extrabold text-gray-900 mb-4"
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6 }}
@@ -81,29 +81,8 @@ const AboutUs = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              A Império dos Pets possui mais de 5 anos de dedicação ao cuidado e à saúde dos animais. Nossa missão vai além de oferecer serviços veterinários — buscamos promover qualidade de vida e bem-estar para cada pet que passa por aqui.
+              À partir do desejo e vocação de seus idealizadores, que já atuaram neste segmento há algum tempo e sentiram a necessidade de unir forças, esforços e competências para fazer a diferença no mercado de impressões gráficas, fundou se em 2003 em Belo Horizonte, a A Criação Gráfica, que vem se consolidando e a cada ano tornando a melhor opção de grandes empresas, como agências de publicidade e empresas que querem compromisso e qualidade.
             </motion.p>
-
-            {/* Seção da lista de serviços */}
-            <motion.div
-                className="mt-6"
-                variants={listContainerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-            >
-                <h3 className="text-xl font-bold text-gray-800 mb-4">
-                    Contamos com uma estrutura completa que reúne:
-                </h3>
-                <ul className="space-y-3">
-                    {services.map((service, index) => (
-                        <motion.li key={index} className="flex items-center" variants={listItemVariants}>
-                            <div className="text-2xl mr-4">{service.icon}</div>
-                            <span className="text-gray-700 text-lg">{service.name}</span>
-                        </motion.li>
-                    ))}
-                </ul>
-            </motion.div>
 
             <motion.p
               className="text-lg text-gray-700 mt-6 leading-relaxed"
@@ -112,7 +91,7 @@ const AboutUs = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              Aqui, cada atendimento é feito com responsabilidade, atenção e muito amor. A saúde e o conforto do seu pet são a nossa prioridade. Trabalhamos todos os dias para que eles tenham uma vida mais feliz, saudável e segura — como verdadeiros membros da família.
+              A acriação gráfica, empresa da impressão gráfica e que atua em Belo Horizonte, desenvolve suas atividades, produtos e serviços com excelência tecnológica, visando à satisfação de seus clientes e a segurança dos funcionários.
             </motion.p>
           </div>
         </motion.div>

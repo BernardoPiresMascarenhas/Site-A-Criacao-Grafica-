@@ -6,11 +6,30 @@ import Header from "./components/header";
 import Hero from "./components/hero";
 import Services from "./components/services";
 import AboutUs from "./components/about";
-import Gallery from "./components/gallery";
+
 import Image from 'next/image';
+import Partners from './components/Partners';
 
 import FormularioContato from "@/app/components/FormularioContato";
 import PromoModal from "./components/PromoModal"; 
+import { InstagramLogo, WhatsappLogo, FacebookLogo } from "@phosphor-icons/react";
+
+const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+        e.preventDefault();
+        const element = document.getElementById(sectionId);
+        if (element) {
+            const headerOffset = 112; // Altura do seu header
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+        
+    };
+
 
 function App() {
   const [showPromo, setShowPromo] = useState(false);       
@@ -72,9 +91,6 @@ function App() {
       {/* About Section */}
       <AboutUs />
 
-      {/* Gallery Section */}
-      <Gallery />
-
      {/* Contact Section */}
       <div id="contact" className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +110,7 @@ function App() {
           </div>
       <div className="mt-10 lg:mt-0 lg:w-1/2">
         <p className="text-gray-600 mb-6 text-base leading-relaxed">
-          Tem alguma dúvida ou quer agendar um horário? Preencha os campos abaixo e nossa equipe entrará em contato o mais breve possível.
+          Tem alguma dúvida ou quer solicitar algum serviço? Preencha os campos abaixo e nossa equipe entrará em contato o mais breve possível.
         </p>
         <FormularioContato />
       </div>
@@ -117,25 +133,75 @@ function App() {
         />
       </a>
 
+      <Partners />
+
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-center items-center">
-            <div className="flex items-center">
-              <Image 
-                src="/logo.png" 
-                alt="Império dos Pets" 
-                width={250} 
-                height={250} 
-                priority 
-              />
-            </div>
-            <div className="mt-4 md:mt-0">
-              <p>&copy; 2025 A Criação Gráfica. Todos os direitos reservados.</p>
-            </div>
-          </div>
+<footer className="bg-gray-900 text-gray-300">
+  <div className="max-w-7xl mx-auto px-6 py-12 lg:px-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      
+      {/* Coluna 1: Logo e Descrição */}
+      <div className="flex flex-col items-center md:items-start">
+        <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="mb-4">
+          <Image 
+            src="/logo.png" 
+            alt="A Criação Gráfica" 
+            width={200}
+            height={200}
+            priority 
+            className="invert brightness-0"
+          />
+        </a>
+        <p className="text-sm max-w-xs">
+          Soluções criativas em impressão e comunicação visual para fortalecer a sua marca.
+        </p>
+      </div>
+
+      {/* Coluna 2: Links de Navegação */}
+      <div>
+        <h3 className="text-lg font-semibold text-white tracking-wider uppercase mb-4">
+          Navegação
+        </h3>
+        <ul className="space-y-2">
+          <li><a href="#home" onClick={(e) => scrollToSection(e, "home")} className="hover:text-yellow-400 transition-colors">Home</a></li>
+          <li><a href="#services" onClick={(e) => scrollToSection(e, "services")} className="hover:text-yellow-400 transition-colors">Serviços</a></li>
+          <li><a href="#about" onClick={(e) => scrollToSection(e, "about")} className="hover:text-yellow-400 transition-colors">Sobre</a></li>
+          <li><a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="hover:text-yellow-400 transition-colors">Contato</a></li>
+        </ul>
+      </div>
+
+      {/* Coluna 3: Contato e Redes Sociais */}
+      <div>
+        <h3 className="text-lg font-semibold text-white tracking-wider uppercase mb-4">
+          Contato
+        </h3>
+        <ul className="space-y-2">
+          <li><p>Rua Itapetinga, 128 Cachoeirinha . Belo Horizonte</p></li>
+          <li><a href="mailto:orcamento@acriação.com.br" className="hover:text-yellow-400 transition-colors">orcamento@acriação.com.br</a></li>
+          <li><a href="tel:+553125552560" className="hover:text-yellow-400 transition-colors">(31) 2555-2560</a></li>
+        </ul>
+        
+        {/* ÍCONES REAIS INSERIDOS AQUI */}
+        <div className="flex justify-center md:justify-start space-x-4 mt-6">
+            <a href="https://www.instagram.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
+                <InstagramLogo className="w-6 h-6 text-yellow-400" />
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=5531987090217&text=Oi%20estava%20no%20site!%20gostaria%20de%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
+                <WhatsappLogo className="w-6 h-6 text-yellow-400" />
+            </a>
+            <a href="https://www.facebook.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
+                <FacebookLogo className="w-6 h-6 text-yellow-400" />
+            </a>
         </div>
-      </footer>
+      </div>
+    </div>
+
+    {/* Sub-rodapé com Copyright */}
+    <div className="mt-12 pt-8 border-t border-gray-800 text-center text-sm">
+      <p>&copy; {new Date().getFullYear()} A Criação Gráfica. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</footer>
     </div>
   );
 }

@@ -97,8 +97,8 @@ const Header = () => {
                         
                         {/* Ícones de redes sociais no menu mobile */}
                         <div className="flex space-x-6 pt-4">
-                            <a href="https://www.instagram.com/clinicaimperiodospets" target="_blank" rel="noopener noreferrer">
-                                <InstagramLogo className="w-8 h-8 text-purple-500 hover:text-purple-600" />
+                            <a href="https://www.instagram.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
+                                <InstagramLogo className="w-6 h-6 text-yellow-400" />
                             </a>
                             <a href="https://api.whatsapp.com/send?phone=5531987090217&text=Oi%20estava%20no%20site!%20gostaria%20de%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
                                 <WhatsappLogo className="w-6 h-6 text-yellow-400" />

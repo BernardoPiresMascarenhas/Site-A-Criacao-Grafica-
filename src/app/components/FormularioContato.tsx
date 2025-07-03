@@ -94,8 +94,8 @@ export default function FormularioContato() {
         type="submit"
         disabled={isLoading}
         className={`w-full ${
-          isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#262A2B]"
-        } text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors`}
+          isLoading ? "bg-yellow-200 cursor-not-allowed" : "bg-yellow-300"
+        } text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-200 transition-colors`}
       >
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
