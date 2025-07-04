@@ -26,18 +26,18 @@ export const servicesData: Service[] = [
     portfolioItems: [
       {
         image: '/cardapio.png',
-        title: 'Cartão para Advocacia',
-        description: 'Design sóbrio com acabamento em verniz localizado, transmitindo seriedade e confiança.'
+        title: 'Cardápio',
+        description: 'Exiba os seus melhores pratos em cardápios da melhor qualidade.'
       },
       {
         image: '/cardapio.png',
-        title: 'Cartão para Cafeteria',
+        title: 'Cardápio',
         description: 'Estilo moderno e amigável em papel reciclado, perfeito para um público jovem.'
       },
       {
         image: '/cardapio.png',
         title: 'Cartão com QR Code',
-        description: 'Integração digital com QR Code que leva diretamente para o WhatsApp ou site.'
+        description: 'Exiba os seus melhores pratos em cardápios da melhor qualidade.'
       }
     ]
   },
@@ -49,14 +49,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/cartaodevisita.png',
+        title: 'Cartões de visita',
+        description: 'Demonstre profissionalismo com belos cartões de visita.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/cartaodevisita.png',
+        title: 'Cartões de visita',
+        description: 'Demonstre profissionalismo com belos cartões de visita.'
       }
     ]
   },
@@ -69,14 +69,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/revista.png',
+        title: 'Revistas',
+        description: 'Qualidade da produção à entrega, e de forma rápida.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/revista.png',
+        title: 'Revistas',
+        description: 'Qualidade da produção à entrega, e de forma rápida.'
       }
     ]
   },
@@ -89,14 +89,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/cracha.png',
+        title: 'Crachás para eventos',
+        description: 'Possibilitam uma rápida visualização da equipe de apoio.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/cracha.png',
+        title: 'Crachás para eventos',
+        description: 'Possibilitam uma rápida visualização da equipe de apoio.'
       }
     ]
   },
@@ -109,14 +109,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/livros.png',
+        title: 'Livros',
+        description: 'Ideal Para Editoras e Autores Independentes.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/livros.png',
+        title: 'Livros',
+        description: 'Ideal Para Editoras e Autores Independentes.'
       }
     ]
   },
@@ -128,14 +128,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/caderno.png',
+        title: 'Caderno',
+        description: 'Ótimos preços e Qualidade Surpreendente.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/caderno.png',
+        title: 'Caderno',
+        description: 'Ótimos preços e Qualidade Surpreendente.'
       }
     ]
   },
@@ -147,14 +147,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/placa.png',
+        title: 'Placas de sinalização',
+        description: 'Nossas placas atendem diversos tipos de necessidades.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/placa.png',
+        title: 'Placas de sinalização',
+        description: 'Nossas placas atendem diversos tipos de necessidades.'
       }
     ]
   },
@@ -166,14 +166,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/tags.png',
+        title: 'Tags',
+        description: 'Esse material pode ser aplicado a diversos segmentos.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/tags.png',
+        title: 'Tags',
+        description: 'Esse material pode ser aplicado a diversos segmentos.'
       }
     ]
   },
@@ -185,14 +185,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/panfletos.png',
+        title: 'Panfletos',
+        description: 'Panfletos de alta qualidade com o melhor preço de BH.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/panfletos.png',
+        title: 'Panfletos',
+        description: 'Panfletos de alta qualidade com o melhor preço de BH.'
       }
     ]
   },
@@ -204,12 +204,12 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
+        image: '/banner.png',
         title: 'Banner para Evento Acadêmico',
         description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
+        image: '/banner.png',
         title: 'Lona para Fachada de Loja',
         description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
       }
@@ -262,14 +262,14 @@ export const servicesData: Service[] = [
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
     portfolioItems: [
       {
-        image: '/portfolio/banners/exemplo1.png',
-        title: 'Banner para Evento Acadêmico',
-        description: 'Banner em lona fosca para evitar reflexos de luz, com ilhós para fácil instalação.'
+        image: '/envelopamento.png',
+        title: 'Envelopamento',
+        description: 'Comunicação visual.'
       },
       {
-        image: '/portfolio/banners/exemplo2.png',
-        title: 'Lona para Fachada de Loja',
-        description: 'Impressão em alta resolução com material resistente ao sol e à chuva.'
+        image: '/envelopamento.png',
+        title: 'Envelopamento',
+        description: 'Comunicação visual.'
       }
     ]
   },
