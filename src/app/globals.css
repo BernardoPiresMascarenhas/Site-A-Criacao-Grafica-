@@ -33,61 +33,61 @@ body {
 }
 
 
-/* DENTRO DE src/app/globals.css */
+/* Adicionando estilos de componentes personalizados na camada correta */
+@layer components {
+  /* === ESTILO COMPARTILHADO PARA TODOS OS BOTÕES CUSTOMIZADOS === */
+  /* Esta regra aplica o mesmo visual para os botões do Hero e do Modal */
+  .hero-swiper-button-next,
+  .hero-swiper-button-prev,
+  .modal-swiper-button-next,
+  .modal-swiper-button-prev {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    
+    
+    background-color: rgba(0, 0, 0, 0.4); /* Fundo um pouco mais escuro para melhor visibilidade */
+    
+    border-radius: 50%;
+    
+    color: white; 
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* A propriedade 'opacity' foi removida para que a seta não fique transparente */
+    transition: background-color 0.3s ease; /* A transição agora é só na cor de fundo */
+  }
+
+  /* Efeito de hover compartilhado (agora só muda a cor de fundo) */
+  .hero-swiper-button-prev:hover,
+  .hero-swiper-button-next:hover,
+  .modal-swiper-button-prev:hover,
+  .modal-swiper-button-next:hover {
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo fica mais escuro no hover */
+  }
 
 
-/* === ESTILO COMPARTILHADO PARA TODOS OS BOTÕES CUSTOMIZADOS === */
-/* Esta regra aplica o mesmo visual para os botões do Hero e do Modal */
-.hero-swiper-button-next,
-.hero-swiper-button-prev,
-.modal-swiper-button-next,
-.modal-swiper-button-prev {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 20;
-  cursor: pointer;
-  width: 50px;
-  height: 55px;
-  
-  
-  background-color: rgba(0, 0, 0, 0.4); /* Fundo um pouco mais escuro para melhor visibilidade */
-  
-  border-radius: 50%;
-  
-  color: white; 
-  
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  /* A propriedade 'opacity' foi removida para que a seta não fique transparente */
-  transition: background-color 0.3s ease; /* A transição agora é só na cor de fundo */
-}
+  /* === POSICIONAMENTO ESPECÍFICO DE CADA CARROSSEL === */
 
-/* Efeito de hover compartilhado (agora só muda a cor de fundo) */
-.hero-swiper-button-prev:hover,
-.hero-swiper-button-next:hover,
-.modal-swiper-button-prev:hover,
-.modal-swiper-button-next:hover {
-  background-color: rgba(0, 0, 0, 0.6); /* Fundo fica mais escuro no hover */
-}
+  /* Posição dos botões do HERO */
+  .hero-swiper-button-prev {
+    left: 3rem;
+  }
+  .hero-swiper-button-next {
+    right: 3rem;
+  }
 
-
-/* === POSICIONAMENTO ESPECÍFICO DE CADA CARROSSEL === */
-
-/* Posição dos botões do HERO */
-.hero-swiper-button-prev {
-  left: 3rem;
-}
-.hero-swiper-button-next {
-  right: 3rem;
-}
-
-/* Posição dos botões do MODAL */
-.modal-swiper-button-prev {
-  left: 1rem;
-}
-.modal-swiper-button-next {
-  right: 1rem;
+  /* Posição dos botões do MODAL */
+  .modal-swiper-button-prev {
+    left: 1rem;
+  }
+  .modal-swiper-button-next {
+    right: 1rem;
+  }
 }

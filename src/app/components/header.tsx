@@ -52,8 +52,8 @@ const Header = () => {
                     {/* Links do Menu Desktop - Escondido em telas menores (md) */}
                     <div className="hidden md:flex items-center space-x-8 text-lg font-semibold">
                         <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-[#ECE537]">Home</a>
-                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-[#ECE537]">Serviços</a>
                         <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-[#ECE537]">Sobre</a>
+                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-[#ECE537]">Serviços</a>
                         <a href="#cliente" onClick={(e) => scrollToSection(e, "cliente")} className="text-gray-600 hover:text-[#ECE537] transition-colors">Clientes</a>
                         <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-[#ECE537]">Contato</a>
                         <a href="https://www.instagram.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">

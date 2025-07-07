@@ -85,11 +85,14 @@ function App() {
       {/* Hero Section */}
       <Hero />
 
+      {/* About Section */}
+      <AboutUs />
+      
       {/* Services Section */}
       <Services />
 
-      {/* About Section */}
-      <AboutUs />
+      <Partners />
+
 
      {/* Contact Section */}
       <div id="contact" className="bg-gray-50 py-16">
@@ -133,7 +136,7 @@ function App() {
         />
       </a>
 
-      <Partners />
+      
 
       {/* Footer */}
 <footer className="bg-gray-900 text-gray-300">
