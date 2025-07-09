@@ -28,7 +28,7 @@ const Header = () => {
     };
 
     return (
-        <nav className="bg-[url('/header-background.png')] bg-cover bg-no-repeat bg-center shadow-sm sticky top-0 z-50 relative">
+        <nav className="bg-white bg-[url('/header-background.png')] bg-repeat-x bg-[size:400px_auto]  shadow-sm sticky top-0 z-50 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-36 items-center">
                     <div className="flex items-center">

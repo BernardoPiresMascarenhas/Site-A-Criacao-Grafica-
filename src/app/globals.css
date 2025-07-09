@@ -91,3 +91,7 @@ body {
     right: 1rem;
   }
 }
+
+section[id] {
+  scroll-margin-top: 80px; /* Use a altura exata do seu header aqui */
+}
