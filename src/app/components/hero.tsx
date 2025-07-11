@@ -58,7 +58,7 @@ const Hero = () => {
   };
 
   return (
-    <div id="home" className="relative w-full h-[87vh] text-white">
+    <div id="home" className="relative w-full h-[85vh] text-white z-30">
       <div className="relative w-full h-full">
         <Swiper
           modules={[Navigation, Pagination, Autoplay, EffectFade]}

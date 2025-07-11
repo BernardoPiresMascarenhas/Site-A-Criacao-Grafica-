@@ -256,7 +256,7 @@ export const servicesData: Service[] = [
   },
   {
     id: 12,
-    title: 'Envelopamento',
+    title: 'Outros Serviços',
     description: 'Comunicação visual.',
     coverImage: '/envelopamento.png',
     wpplink: 'https://wa.me/SEUNUMERO?text=Olá,%20gostaria%20de%20um%20orçamento%20para%20banners.',
@@ -267,8 +267,8 @@ export const servicesData: Service[] = [
         description: 'Comunicação visual.'
       },
       {
-        image: '/envelopamento.png',
-        title: 'Envelopamento',
+        image: '/calendario.png',
+        title: 'Calendário',
         description: 'Comunicação visual.'
       }
     ]

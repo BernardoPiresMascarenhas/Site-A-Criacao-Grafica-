@@ -60,24 +60,46 @@ function App() {
         />
       )}
 
-      {/* Botão flutuante para reabrir o modal */}
-      {minimized && !showPromo && (
-        <button
-          onClick={() => {
-          setShowPromo(true);
-          setMinimized(false);
-          }}
-          className="fixed bottom-4 left-8 p-2 rounded-full hover:scale-110 transition-transform duration-300 z-50 sm:left-8 sm:p-2 md:left-8 md:p-2 xs:left-4 xs:p-1" // 'xs' aqui é só um exemplo, veja abaixo como fazer
-        >
-          <Image
-            src="/promo.png"
-            alt="Promoção"
-            width={48} 
-            height={48}
-            className="w-14 h-14 sm:w-20 sm:h-20 animate-bounce"
-          />
-        </button>
-      )}
+    {/* Container Flexbox para alinhar os botões flutuantes */}
+    <div className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-between p-4 pointer-events-none">
+
+      {/* Wrapper para o botão do modal (para controlar os eventos do ponteiro) */}
+      <div className="pointer-events-auto">
+        {/* Botão flutuante para reabrir o modal */}
+        {minimized && !showPromo && (
+          <button
+            onClick={() => {
+              setShowPromo(true);
+              setMinimized(false);
+            }}
+            className="p-2 transition-transform duration-300 rounded-full hover:scale-110"
+          >
+            <Image
+              src="/promo.png"
+              alt="Promoção"
+              width={48}
+              height={48}
+              className="w-14 h-14 sm:w-20 sm:h-20"
+            />
+          </button>
+        )}
+      </div>
+
+      {/* Botão flutuante do WhatsApp */}
+      <a
+        href="https://wa.me/553125552560?text=Olá,%20gostaria%20de%20agendar%20uma%20consulta."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="p-3 transition-transform duration-300 ease-in-out bg-green-500 rounded-full shadow-lg pointer-events-auto hover:bg-green-600 hover:scale-110"
+      >
+        <Image
+          src="/whatsapp.png"
+          alt="WhatsApp"
+          width={48}
+          height={48}
+        />
+      </a>
+    </div>
 
       {/* Navigation */}
       <Header />
@@ -120,23 +142,7 @@ function App() {
     </div>
   </div>
 </div>
-
-      {/* Botão flutuante do WhatsApp */}
-      <a
-        href="https://wa.me/553125552560?text=Olá,%20gostaria%20de%20agendar%20uma%20consulta."
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-4 right-4 bg-green-500 p-3 rounded-full shadow-lg hover:bg-green-600 transition-transform duration-300 ease-in-out hover:scale-110"
-      >
-        <Image
-          src="/whatsapp.png"
-          alt="WhatsApp"
-          width={48}  
-          height={48}
-        />
-      </a>
-
-      
+  
 
       {/* Footer */}
 <footer className="bg-gray-900 text-gray-300">
