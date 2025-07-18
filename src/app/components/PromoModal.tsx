@@ -2,6 +2,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import Image from 'next/image'; // MUDANÇA: Importar o componente Image
 
 type PromoModalProps = {
   onClose: () => void;
@@ -53,10 +54,13 @@ const PromoModal = ({ onClose, onWhatsApp }: PromoModalProps) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                <img
+                {/* MUDANÇA: Troca de <img> por <Image> */}
+                <Image
                   src="/promocao.png"
                   alt="Promoção"
-                  className="rounded-2xl shadow-xl border-4 border-yellow-200 w-full"
+                  width={400} // Defina a largura real da sua imagem
+                  height={400} // Defina a altura real da sua imagem
+                  className="rounded-2xl shadow-xl border-4 border-yellow-200 w-full h-auto" // h-auto para manter a proporção
                 />
               </motion.div>
 

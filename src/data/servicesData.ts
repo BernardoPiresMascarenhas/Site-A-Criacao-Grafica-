@@ -6,21 +6,24 @@
 export interface FormField {
   name: string;
   label: string;
-  type: 'number' | 'select' | 'text'; // Adicionei 'text' para flexibilidade
+  type: 'number' | 'select' | 'text';
   options?: { value: string | number; label: string }[];
   defaultValue?: string | number;
   placeholder?: string;
 }
 
+// Interface para os valores do formulário, para evitar o uso de 'any'
+export type FormValues = { [key: string]: string | number };
+
 // Interface para a calculadora de um serviço
 export interface Calculator {
   fields: FormField[];
-  formula: (values: { [key: string]: any }) => number | null;
+  formula: (values: FormValues) => number | null;
 }
 
 // Interface para um item do portfólio
 export interface PortfolioItem {
-  id: number; // Adicionei um ID para melhor performance no React
+  id: number;
   image: string;
   title: string;
   description: string;
@@ -29,16 +32,16 @@ export interface PortfolioItem {
 // Interface principal de um serviço, agora com a calculadora opcional
 export interface Service {
   id: number;
-  title:string;
+  title: string;
   description: string;
   coverImage: string;
   portfolioItems: PortfolioItem[];
   wpplink: string;
-  calculator?: Calculator; // O '?' torna o campo opcional
+  calculator?: Calculator;
 }
 
 
-// --- DADOS DOS SERVIÇOS ATUALIZADOS ---
+// --- DADOS DOS SERVIÇOS CORRIGIDOS ---
 
 export const servicesData: Service[] = [
   {
@@ -68,11 +71,10 @@ export const servicesData: Service[] = [
       formula: (values) => {
         if (!values.quantidade || !values.paginas) return null;
         const custoPorPagina = 2.50;
-        let multiplicadorMaterial = 1;
+        let multiplicadorMaterial = 1; // 'let' é mantido aqui porque o valor é reatribuído
         if (values.material === 'pvc_05mm') multiplicadorMaterial = 2.5;
         if (values.material === 'sintetico') multiplicadorMaterial = 2;
-        // Fórmula de exemplo
-        return (values.paginas * custoPorPagina * multiplicadorMaterial) * values.quantidade;
+        return (Number(values.paginas) * custoPorPagina * multiplicadorMaterial) * Number(values.quantidade);
       }
     }
   },
@@ -106,7 +108,7 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.quantidade) return null;
-        let precoBase = values.quantidade === 1000 ? 150 : 95;
+        let precoBase = Number(values.quantidade) === 1000 ? 150 : 95; // 'let' mantido pois é reatribuído
         if (values.acabamento === 'fosco_simples') precoBase *= 0.85;
         if (values.acabamento === 'sem_acabamento') precoBase *= 0.7;
         return precoBase;
@@ -144,8 +146,8 @@ export const servicesData: Service[] = [
         if (!values.quantidade || !values.paginas) return null;
         const custoMiolo = values.gramatura_miolo === 'couche_115g' ? 0.30 : 0.25;
         const custoCapa = values.gramatura_capa === 'couche_250g' ? 1.50 : 1.00;
-        const custoPorRevista = (custoMiolo * (values.paginas - 4)) + custoCapa;
-        return custoPorRevista * values.quantidade;
+        const custoPorRevista = (custoMiolo * (Number(values.paginas) - 4)) + custoCapa;
+        return custoPorRevista * Number(values.quantidade);
       }
     }
   },
@@ -178,11 +180,11 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.quantidade) return null;
-        let custoCracha = values.material === 'pvc_076mm' ? 7.50 : 4.00;
-        let custoCordao = 0;
+        const custoCracha = values.material === 'pvc_076mm' ? 7.50 : 4.00; // MUDANÇA: let -> const
+        let custoCordao = 0; // 'let' mantido
         if (values.cordao === 'sim') custoCordao = 2.00;
         if (values.cordao === 'sim_personalizado') custoCordao = 4.50;
-        return (custoCracha + custoCordao) * values.quantidade;
+        return (custoCracha + custoCordao) * Number(values.quantidade);
       }
     }
   },
@@ -196,7 +198,6 @@ export const servicesData: Service[] = [
       { id: 1, image: '/livros.png', title: 'Livro Brochura', description: 'Capa flexível, ideal para grandes tiragens.' },
       { id: 2, image: '/livros.png', title: 'Livro Capa Dura', description: 'Acabamento premium e de alta durabilidade.' }
     ],
-    // A calculadora de livros é complexa. Este é um exemplo simplificado.
     calculator: {
       fields: [
         { name: 'quantidade', label: 'Quantidade de Livros', type: 'number', defaultValue: 50 },
@@ -212,7 +213,7 @@ export const servicesData: Service[] = [
         if (!values.quantidade || !values.paginas) return null;
         const custoCapa = values.capa === 'dura' ? 25.00 : 8.00;
         const custoPagina = 0.18;
-        return (custoCapa + (values.paginas * custoPagina)) * values.quantidade;
+        return (custoCapa + (Number(values.paginas) * custoPagina)) * Number(values.quantidade);
       }
     }
   },
@@ -244,9 +245,9 @@ export const servicesData: Service[] = [
         ],
         formula: (values) => {
             if (!values.quantidade) return null;
-            let custoBase = values.capa === 'dura' ? 15.00 : 9.00;
-            let custoFolhas = values.folhas === 100 ? 5.00 : 2.50;
-            return (custoBase + custoFolhas) * values.quantidade;
+            const custoBase = values.capa === 'dura' ? 15.00 : 9.00;         // MUDANÇA: let -> const
+            const custoFolhas = Number(values.folhas) === 100 ? 5.00 : 2.50; // MUDANÇA: let -> const
+            return (custoBase + custoFolhas) * Number(values.quantidade);
         }
     }
   },
@@ -273,10 +274,9 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.largura || !values.altura) return null;
-        const area_m2 = (values.largura * values.altura) / 10000;
+        const area_m2 = (Number(values.largura) * Number(values.altura)) / 10000;
         const preco_m2 = values.material === 'acrilico_3mm' ? 450 : 250;
-        let custoFinal = area_m2 * preco_m2;
-        // Adiciona um custo mínimo para peças pequenas
+        const custoFinal = area_m2 * preco_m2; // MUDANÇA: let -> const
         return Math.max(custoFinal, 35.00);
       }
     }
@@ -309,8 +309,8 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.quantidade) return null;
-        let precoMilheiro = values.papel === 'kraft_280g' ? 140 : 120;
-        return (values.quantidade / 1000) * precoMilheiro;
+        const precoMilheiro = values.papel === 'kraft_280g' ? 140 : 120; // MUDANÇA: let -> const
+        return (Number(values.quantidade) / 1000) * precoMilheiro;
       }
     }
   },
@@ -347,7 +347,7 @@ export const servicesData: Service[] = [
         }
       ],
       formula: (values) => {
-        let precoBase = 0;
+        let precoBase = 0; // 'let' mantido
         if (values.quantidade === 1000) precoBase = 180;
         if (values.quantidade === 2500) precoBase = 260;
         if (values.quantidade === 5000) precoBase = 380;
@@ -380,8 +380,8 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.largura || !values.altura) return null;
-        const area_m2 = (values.largura * values.altura) / 10000;
-        const preco_m2 = 90; // Preço por metro quadrado da lona impressa
+        const area_m2 = (Number(values.largura) * Number(values.altura)) / 10000;
+        const preco_m2 = 90;
         const custoAcabamento = values.acabamento === 'ilhos' ? 15 : 0;
         return (area_m2 * preco_m2) + custoAcabamento;
       }
@@ -411,11 +411,10 @@ export const servicesData: Service[] = [
       ],
       formula: (values) => {
         if (!values.largura || !values.altura) return null;
-        const area_m2 = (values.largura * values.altura) / 10000;
-        let preco_m2 = 80;
+        const area_m2 = (Number(values.largura) * Number(values.altura)) / 10000;
+        let preco_m2 = 80; // 'let' mantido
         if (values.corte === 'especial') preco_m2 = 110;
-        let custoFinal = area_m2 * preco_m2;
-        // Custo mínimo
+        const custoFinal = area_m2 * preco_m2; // MUDANÇA: let -> const
         return Math.max(custoFinal, 25.00);
       }
     }
@@ -430,6 +429,5 @@ export const servicesData: Service[] = [
       { id: 1, image: '/envelopamento.png', title: 'Envelopamento', description: 'Envelopamento de frotas e decoração de ambientes.' },
       { id: 2, image: '/calendario.png', title: 'Calendário', description: 'Calendários de mesa ou parede personalizados.' }
     ]
-    // Sem calculadora para este, pois é um item genérico. O usuário será direcionado ao WhatsApp.
   },
 ];
