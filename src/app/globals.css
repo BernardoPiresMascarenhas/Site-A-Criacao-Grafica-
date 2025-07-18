@@ -95,3 +95,32 @@ body {
 section[id] {
   scroll-margin-top: 80px; /* Use a altura exata do seu header aqui */
 }
+
+
+/* Estilos para a Paginação Customizada do Swiper no Modal */
+.swiper-pagination-custom {
+  position: absolute;
+  bottom: 16px !important; /* Ajuste a distância do fundo */
+  left: 50% !important;
+  transform: translateX(-50%);
+  width: auto !important;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0.8;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+  background-color: #FBBF24; /* Cor amarela do seu site */
+  width: 24px;
+}
+
