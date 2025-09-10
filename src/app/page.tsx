@@ -87,7 +87,7 @@ function App() {
 
       {/* Botão flutuante do WhatsApp */}
       <a
-        href="https://wa.me/553125552560?text=Olá,%20gostaria%20de%20agendar%20uma%20consulta."
+        href="https://wa.me/5531987090217?text=Olá,%20gostaria%20de%20agendar%20uma%20consulta."
         target="_blank"
         rel="noopener noreferrer"
         className="p-3 transition-transform duration-300 ease-in-out bg-green-500 rounded-full shadow-lg pointer-events-auto hover:bg-green-600 hover:scale-110"
@@ -116,24 +116,45 @@ function App() {
       <Partners />
 
 
-     {/* Contact Section */}
-      <div id="contact" className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:flex lg:items-center lg:justify-between">
-            <div className="lg:w-1/2">
-              <h2 className="text-3xl font-bold text-gray-900">
-                Entre em Contato
-              </h2>
-            <div className="mt-8 space-y-6">
-              <ContactInfo
-                icon={<MapPin />}
-                text="Rua Itapetinga, 128 Cachoeirinha . Belo Horizonte"
-              />
-              <ContactInfo icon={<Phone />} text="(31) 2555-2560" />
-              <ContactInfo icon={<Clock />} text="Seg-Sex: 8h às 18h" />
-            </div>
+     {/* Seção de Contato */}
+<div id="contact" className="bg-gray-50 py-16">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
+      {/* Coluna da Esquerda: Informações e Mapa */}
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">
+            Entre em Contato
+          </h2>
+
+          {/* NOVO BLOCO DO MAPA */}
+          <div className="mt-10 h-80 w-full overflow-hidden rounded-lg shadow-xl">
+            <iframe
+              className="h-full w-full"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3752.053359398571!2d-43.93738878508616!3d-19.87991978663186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa69b76a5b634cb%3A0x34346808794833a6!2sR.%20Itapetinga%2C%20128%20-%20Cachoeirinha%2C%20Belo%20Horizonte%20-%20MG%2C%2031130-510%2C%20Brasil!5e0!3m2!1spt-BR!2sus!4v1694034859283!5m2!1spt-BR!2sus"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Localização da Gráfica a Criação no Google Maps"
+            ></iframe>
           </div>
-      <div className="mt-10 lg:mt-0 lg:w-1/2">
+          
+          {/* FIM DO BLOCO DO MAPA */}
+
+          <div className="mt-8 space-y-6">
+            <ContactInfo
+              icon={<MapPin />}
+              text="Rua Itapetinga, 128 - Cachoeirinha, Belo Horizonte, Brasil"
+            />
+            <ContactInfo icon={<Phone />} text="Local: (31) 2555-2560  | WhatsApp: 31 98709-0217" />
+            <ContactInfo icon={<Clock />} text="Seg-Sex: 8h às 18h" />
+          </div>
+        </div>
+      </div>
+
+      {/* Coluna da Direita: Formulário */}
+      <div className="mt-10 lg:mt-0">
         <p className="text-gray-600 mb-6 text-base leading-relaxed">
           Tem alguma dúvida ou quer solicitar algum serviço? Preencha os campos abaixo e nossa equipe entrará em contato o mais breve possível.
         </p>
@@ -142,7 +163,7 @@ function App() {
     </div>
   </div>
 </div>
-  
+
 
       {/* Footer */}
 <footer className="bg-gray-900 text-gray-300">
