@@ -6,6 +6,8 @@ import Header from "./components/header";
 import Hero from "./components/hero";
 import Services from "./components/services";
 import AboutUs from "./components/about";
+import InstagramFeed from "./components/SocialFeed";
+import Testimonials from "./components/Testimonials";
 
 import Image from 'next/image';
 import Partners from './components/Partners';
@@ -113,6 +115,8 @@ function App() {
       {/* Services Section */}
       <Services />
 
+      <InstagramFeed />
+      <Testimonials />
       <Partners />
 
 
@@ -194,8 +198,10 @@ function App() {
         </h3>
         <ul className="space-y-2">
           <li><a href="#home" onClick={(e) => scrollToSection(e, "home")} className="hover:text-yellow-400 transition-colors">Home</a></li>
-          <li><a href="#services" onClick={(e) => scrollToSection(e, "services")} className="hover:text-yellow-400 transition-colors">Serviços</a></li>
           <li><a href="#about" onClick={(e) => scrollToSection(e, "about")} className="hover:text-yellow-400 transition-colors">Sobre</a></li>
+          <li><a href="#services" onClick={(e) => scrollToSection(e, "services")} className="hover:text-yellow-400 transition-colors">Serviços</a></li>
+          <li><a href="#social-feed" onClick={(e) => scrollToSection(e, "social-feed")} className="hover:text-yellow-400 transition-colors">Feed</a></li>
+          <li><a href="#testimonials" onClick={(e) => scrollToSection(e, "testimonials")} className="hover:text-yellow-400 transition-colors">Avaliações</a></li>
           <li><a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="hover:text-yellow-400 transition-colors">Contato</a></li>
         </ul>
       </div>

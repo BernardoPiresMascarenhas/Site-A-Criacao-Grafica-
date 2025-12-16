@@ -14,9 +14,7 @@ const Partners = () => {
   return (
     <section id="cliente" className="py-16" style={{ backgroundColor: '#f4f4fc' }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-12">
-          Clientes que Confiam em Nosso Trabalho
-        </h2>
+        
         
         <Swiper
           modules={[Autoplay, FreeMode]}

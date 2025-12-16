@@ -54,7 +54,8 @@ const Header = () => {
                         <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-[#ECE537]">Home</a>
                         <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-[#ECE537]">Sobre</a>
                         <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-[#ECE537]">Serviços</a>
-                        <a href="#cliente" onClick={(e) => scrollToSection(e, "cliente")} className="text-gray-600 hover:text-[#ECE537] transition-colors">Clientes</a>
+                        <a href="#social-feed" onClick={(e) => scrollToSection(e, "social-feed")} className="text-gray-700 hover:text-[#ECE537]">Feed</a>
+                        <a href="#testimonials" onClick={(e) => scrollToSection(e, "testimonials")} className="text-gray-700 hover:text-[#ECE537]">Avaliações</a>
                         <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-[#ECE537]">Contato</a>
                         <a href="https://www.instagram.com/acriacaografic/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-[#262A2B] rounded-full transition-transform duration-300 transform hover:scale-110">
                             <InstagramLogo className="w-6 h-6 text-yellow-400" />
@@ -90,9 +91,10 @@ const Header = () => {
                 <div className="md:hidden bg-white/95 backdrop-blur-sm absolute top-full left-0 w-full shadow-lg">
                     <div className="flex flex-col items-center space-y-4 py-8 text-lg font-semibold">
                         <a href="#home" onClick={(e) => scrollToSection(e, "home")} className="text-gray-700 hover:text-yellow-300">Home</a>
-                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-yellow-300">Serviços</a>
                         <a href="#about" onClick={(e) => scrollToSection(e, "about")} className="text-gray-700 hover:text-yellow-300">Sobre</a>
-                        <a href="#cliente" onClick={(e) => scrollToSection(e, "cliente")} className="text-gray-600 hover:text-yellow-300 transition-colors">Clientes</a>
+                        <a href="#services" onClick={(e) => scrollToSection(e, "services")} className="text-gray-700 hover:text-yellow-300">Serviços</a>
+                        <a href="#social-feed" onClick={(e) => scrollToSection(e, "social-feed")} className="text-gray-700 hover:text-yellow-300">Feed</a>
+                        <a href="#testimonials" onClick={(e) => scrollToSection(e, "testimonials")} className="text-gray-700 hover:text-[#ECE537]">Avaliações</a>
                         <a href="#contact" onClick={(e) => scrollToSection(e, "contact")} className="text-gray-700 hover:text-yellow-300">Contato</a>
                         
                         {/* Ícones de redes sociais no menu mobile */}
