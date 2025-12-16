@@ -30,12 +30,12 @@ const OrcamentoForm: React.FC<OrcamentoFormProps> = ({ calculator }) => {
     setFormValues(prev => ({ ...prev, [name]: finalValue }));
   };
 
-  // Recalcula o orçamento sempre que os valores do formulário ou a fórmula mudarem
   useEffect(() => {
-    const result = calculator.formula(formValues);
-    setOrcamento(result);
-    // MUDANÇA: Adicionamos calculator.formula ao array de dependências
-  }, [formValues, calculator.formula]);
+    if (calculator && calculator.formula) {
+        const result = calculator.formula(formValues);
+        setOrcamento(result);
+    }
+  }, [formValues, calculator]);
 
   const renderField = (field: FormField) => {
     const commonProps = {

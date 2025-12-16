@@ -163,7 +163,7 @@ Recomendo de olhos fechados a Criação, pois sei que, com eles, cada projeto se
                     </div>
 
                     <p className="text-slate-300 text-lg italic leading-relaxed md:text-xl mb-8 whitespace-pre-line">
-                        "{featuredReview.text}"
+                        &quot;{featuredReview.text}&quot;
                     </p>
 
                     {/* Rodapé do Destaque com FOTO */}
@@ -203,7 +203,7 @@ Recomendo de olhos fechados a Criação, pois sei que, com eles, cada projeto se
               </div>
 
               <p className="text-slate-600 italic mb-6 leading-relaxed flex-grow">
-                "{review.text}"
+                &quot;{review.text}&quot;
               </p>
 
               {/* Rodapé do Card Normal com FOTO */}
