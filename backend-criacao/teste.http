@@ -1,2 +1,32 @@
 GET http://localhost:3333/perfil
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+### Criar um novo Cliente
+POST http://localhost:3333/clientes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+{
+  "nome": "Papelaria do Centro",
+  "telefone": "31988887777",
+  "email": "contato@papelariacentro.com.br"
+}
+
+### Listar todos os Clientes
+GET http://localhost:3333/clientes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+### Criar um Pedido para um Cliente
+POST http://localhost:3333/pedidos
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+{
+  "descricao": "1000 Cartões de Visita - Couché 300g",
+  "valor": 120.50,
+  "clienteId": "e2b9d968-4867-4763-b78a-b881fd6a2553"
+}
+
+### Listar todos os Pedidos (com os dados do cliente junto)
+GET http://localhost:3333/pedidos
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U

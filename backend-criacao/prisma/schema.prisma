@@ -22,3 +22,30 @@ model Usuario {
 
   @@map("usuarios") // Isso diz pro MySQL criar a tabela com o nome em minúsculo e no plural
 }
+
+model Cliente {
+  id        String   @id @default(uuid())
+  nome      String
+  telefone  String
+  email     String?
+  criadoEm  DateTime @default(now())
+  
+  // Avisamos o Prisma que um cliente pode ter VÁRIOS pedidos (uma Array)
+  pedidos   Pedido[] 
+
+  @@map("clientes")
+}
+
+model Pedido {
+  id          String   @id @default(uuid())
+  descricao   String   // Ex: "1000 Cartões de Visita, papel couché 300g"
+  valor       Float    // Ex: 120.50
+  status      String   @default("ORÇAMENTO") // Pode ser: ORÇAMENTO, PRODUÇÃO, PRONTO
+  criadoEm    DateTime @default(now())
+
+  // A mágica do Relacionamento acontece aqui (Foreign Key):
+  clienteId   String
+  cliente     Cliente  @relation(fields: [clienteId], references: [id])
+
+  @@map("pedidos")
+}

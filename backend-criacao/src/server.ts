@@ -91,6 +91,77 @@ app.post('/login', async (request, response) => {
   return response.json({ token });
 });
 
+// ROTA PARA CRIAR UM CLIENTE (Protegida)
+app.post('/clientes', verificarToken, async (request, response) => {
+  const { nome, telefone, email } = request.body;
+
+  try {
+    const novoCliente = await prisma.cliente.create({
+      data: {
+        nome,
+        telefone,
+        email // Como definimos no schema que é opcional, pode não ser enviado
+      }
+    });
+
+    return response.status(201).json(novoCliente);
+  } catch (error) {
+    return response.status(400).json({ error: 'Erro ao criar o cliente.' });
+  }
+});
+
+// ROTA PARA LISTAR TODOS OS CLIENTES (Protegida)
+app.get('/clientes', verificarToken, async (request, response) => {
+  try {
+    const clientes = await prisma.cliente.findMany({
+      orderBy: {
+        criadoEm: 'desc' // Mostra sempre os clientes mais recentes no topo da lista
+      }
+    });
+
+    return response.json(clientes);
+  } catch (error) {
+    return response.status(500).json({ error: 'Erro ao procurar os clientes.' });
+  }
+});
+
+// ROTA PARA CRIAR UM PEDIDO/ORÇAMENTO (Protegida)
+app.post('/pedidos', verificarToken, async (request, response) => {
+  const { descricao, valor, status, clienteId } = request.body;
+
+  try {
+    const novoPedido = await prisma.pedido.create({
+      data: {
+        descricao,
+        valor,
+        status: status || "ORÇAMENTO", // Se não mandar status, vira orçamento por padrão
+        clienteId
+      }
+    });
+
+    return response.status(201).json(novoPedido);
+  } catch (error) {
+    return response.status(400).json({ error: 'Erro ao criar o pedido. Verifique se o ID do cliente está correto.' });
+  }
+});
+
+// ROTA PARA LISTAR TODOS OS PEDIDOS (Protegida)
+app.get('/pedidos', verificarToken, async (request, response) => {
+  try {
+    const pedidos = await prisma.pedido.findMany({
+      orderBy: { criadoEm: 'desc' },
+      // A MÁGICA DO PRISMA AQUI: Ele já traz os dados do cliente dono do pedido junto!
+      include: {
+        cliente: true 
+      }
+    });
+
+    return response.json(pedidos);
+  } catch (error) {
+    return response.status(500).json({ error: 'Erro ao buscar os pedidos.' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
