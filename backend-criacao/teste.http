@@ -1,0 +1,2 @@
+GET http://localhost:3333/perfil
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
