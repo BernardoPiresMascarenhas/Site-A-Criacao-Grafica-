@@ -30,3 +30,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzL
 ### Listar todos os Pedidos (com os dados do cliente junto)
 GET http://localhost:3333/pedidos
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+### Cadastrar um Produto na Loja
+POST http://localhost:3333/produtos
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdkZjc4Y2QzLTRmYzEtNGU4YS1hM2E1LTI0OTJlZWM3NWMxYSIsImlhdCI6MTc3MjQ5OTQzOCwiZXhwIjoxNzcyNTg1ODM4fQ.iK_o7QGyr-foUmwMtV2cZdWg-7oA7c1vpZeylxIas1U
+
+{
+  "nome": "Cartão de Visita Premium",
+  "descricao": "Couché 300g, Verniz Localizado, Frente e Verso (1000 un)",
+  "precoBase": 150.00,
+  "imagemUrl": "" 
+}
+
+### Listar a Vitrine (Qualquer pessoa acessa!)
+GET http://localhost:3333/produtos

@@ -28,9 +28,9 @@ model Cliente {
   nome      String
   telefone  String
   email     String?
+  senha     String?  // <-- NOVO: A senha do cliente para ele acessar o site!
   criadoEm  DateTime @default(now())
   
-  // Avisamos o Prisma que um cliente pode ter VÁRIOS pedidos (uma Array)
   pedidos   Pedido[] 
 
   @@map("clientes")
@@ -38,14 +38,41 @@ model Cliente {
 
 model Pedido {
   id          String   @id @default(uuid())
-  descricao   String   // Ex: "1000 Cartões de Visita, papel couché 300g"
-  valor       Float    // Ex: 120.50
-  status      String   @default("ORÇAMENTO") // Pode ser: ORÇAMENTO, PRODUÇÃO, PRONTO
+  descricao   String   
+  valor       Float    
+  status      String   @default("ORÇAMENTO") 
+  arquivoArte String?  // <-- NOVO: Onde vamos salvar o link do PDF do cliente
+  detalhes    Json?    // <-- NOVO: Salva as escolhas exatas (Ex: Papel 300g, 1000 un)
   criadoEm    DateTime @default(now())
 
-  // A mágica do Relacionamento acontece aqui (Foreign Key):
   clienteId   String
   cliente     Cliente  @relation(fields: [clienteId], references: [id])
 
   @@map("pedidos")
+}
+
+model Produto {
+  id          String   @id @default(uuid())
+  nome        String   
+  descricao   String?  
+  precoBase   Float    
+  imagemUrl   String?  // Capa principal
+  variacoes   Json?    // <-- NOVO: O "superpoder" flexível (Materiais, Quantidades, Acabamentos)
+  criadoEm    DateTime @default(now())
+
+  imagens     ImagemProduto[] // <-- NOVO: A galeria de fotos extras no rodapé
+
+  @@map("produtos")
+}
+
+// <-- NOVA TABELA: Para o rodapé de fotos extras
+model ImagemProduto {
+  id        String  @id @default(uuid())
+  url       String
+  produtoId String
+  
+  // O onDelete: Cascade significa que se o seu sogro apagar o Produto, as fotos extras dele também são apagadas do banco!
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@map("imagens_produto")
 }
