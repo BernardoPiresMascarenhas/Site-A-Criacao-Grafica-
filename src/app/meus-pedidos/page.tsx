@@ -15,6 +15,7 @@ export default function MeusPedidosPage() {
   const router = useRouter();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [erroBackend, setErroBackend] = useState(""); // Novo estado para exibir erros
 
   useEffect(() => {
     const carregarPedidos = async () => {
@@ -33,13 +34,19 @@ export default function MeusPedidosPage() {
         if (resposta.ok) {
           setPedidos(await resposta.json());
         } else {
-          // Se o token for inválido, limpa e manda para o login
-          localStorage.removeItem("token_cliente");
-          localStorage.removeItem("nome_cliente");
-          router.push("/login-cliente");
+          // AGORA ELE SÓ EXPULSA SE FOR ERRO 401 (Token realmente inválido)
+          if (resposta.status === 401) {
+            localStorage.removeItem("token_cliente");
+            localStorage.removeItem("dados_cliente");
+            localStorage.removeItem("nome_cliente");
+            router.push("/login-cliente");
+          } else {
+            // Se for outro erro (ex: 404, 500), ele apenas avisa na tela e não te desloga!
+            setErroBackend(`O servidor retornou um erro (Código ${resposta.status}). A rota pode estar ausente.`);
+          }
         }
       } catch (error) {
-        console.error("Erro ao carregar os pedidos:", error);
+        setErroBackend("Erro de conexão com o servidor. O backend está rodando?");
       } finally {
         setCarregando(false);
       }
@@ -48,7 +55,6 @@ export default function MeusPedidosPage() {
     carregarPedidos();
   }, [router]);
 
-  // Função para dar estilo e ícone dependendo do status do pedido
   const renderStatus = (status: string) => {
     switch (status) {
       case "ORÇAMENTO":
@@ -77,12 +83,12 @@ export default function MeusPedidosPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800 pb-16">
       
-      {/* Cabeçalho Simples */}
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
           <button 
             onClick={() => router.push("/")}
             className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition"
+            title="Voltar ao Início"
           >
             <ArrowLeft size={24} />
           </button>
@@ -97,6 +103,10 @@ export default function MeusPedidosPage() {
         {carregando ? (
           <div className="text-center text-gray-400 py-10 font-bold text-lg animate-pulse">
             A carregar histórico...
+          </div>
+        ) : erroBackend ? (
+          <div className="bg-red-50 border border-red-200 text-red-600 p-6 rounded-2xl text-center font-bold">
+            {erroBackend}
           </div>
         ) : pedidos.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100 mt-8">

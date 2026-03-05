@@ -12,11 +12,27 @@ const Header = () => {
 
     // O Next.js dá uma espiada no navegador para ver se o cliente está logado
     useEffect(() => {
-        const nomeSalvo = localStorage.getItem("nome_cliente");
-        if (nomeSalvo) {
-            setNomeCliente(nomeSalvo);
-        }
-    }, []);
+    // Puxa o nome simples que o Login acabou de salvar
+    const nomeSalvo = localStorage.getItem('nome_cliente');
+    
+    // Como plano B, tenta puxar de dentro do JSON, caso precise
+    const dadosSalvos = localStorage.getItem('dados_cliente');
+    let nomeDoJson = null;
+    
+    if (dadosSalvos) {
+        try {
+            const parsed = JSON.parse(dadosSalvos);
+            nomeDoJson = parsed.nome;
+        } catch (e) {}
+    }
+
+    // Define o estado com o que encontrou
+    if (nomeSalvo) {
+        setNomeCliente(nomeSalvo);
+    } else if (nomeDoJson) {
+        setNomeCliente(nomeDoJson);
+    }
+  }, []);
 
     const fazerLogout = () => {
         localStorage.removeItem("token_cliente");
@@ -91,17 +107,29 @@ const Header = () => {
                                         <span className="font-bold text-[#262A2B] truncate max-w-[120px]" title={nomeCliente}>
                                             {nomeCliente.split(' ')[0]}
                                         </span>
-                                        <button 
-                                            onClick={() => router.push('/meus-pedidos')}
-                                            className="text-xs text-yellow-600 hover:text-yellow-700 font-bold text-left mt-1 hover:underline transition-colors"
-                                        >
-                                            Ver meus pedidos
-                                        </button>
+                                        
+                                        {/* NOVOS LINKS DE NAVEGAÇÃO */}
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <button 
+                                                onClick={() => router.push('/minha-conta')}
+                                                className="text-[11px] text-gray-500 hover:text-[#262A2B] font-bold text-left hover:underline transition-colors"
+                                            >
+                                                Minha conta
+                                            </button>
+                                            <span className="text-gray-300 text-[10px]">|</span>
+                                            <button 
+                                                onClick={() => router.push('/meus-pedidos')}
+                                                className="text-[11px] text-yellow-600 hover:text-yellow-700 font-bold text-left hover:underline transition-colors"
+                                            >
+                                                Meus pedidos
+                                            </button>
+                                        </div>
                                     </div>
+                                    
                                     <button 
                                         onClick={fazerLogout}
                                         title="Sair da conta"
-                                        className="text-gray-400 hover:text-red-500 transition-colors p-2"
+                                        className="text-gray-400 hover:text-red-500 transition-colors p-2 ml-2"
                                     >
                                         <SignOut size={24} weight="bold" />
                                     </button>
@@ -111,7 +139,7 @@ const Header = () => {
                                 <>
                                     <button 
                                         onClick={() => router.push('/login-cliente')}
-                                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-bold transition"
+                                        className="flex items-center gap-2 text-gray-700 hover:text-yellow-400 font-bold transition"
                                     >
                                         <User size={20} weight="bold" />
                                         Entrar
@@ -120,7 +148,7 @@ const Header = () => {
                                         onClick={() => router.push('/cadastro-cliente')}
                                         className="bg-[#262A2B] text-white px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 hover:text-black transition-all shadow-sm text-sm"
                                     >
-                                        Criar Conta
+                                        Criar Conta                                  
                                     </button>
                                 </>
                             )}

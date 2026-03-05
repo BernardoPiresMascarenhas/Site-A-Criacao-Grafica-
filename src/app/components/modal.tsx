@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { X, WhatsappLogo, CaretLeft, CaretRight, Image as ImageIcon, PaperPlaneTilt, CheckCircle, FilePdf } from '@phosphor-icons/react';
@@ -19,14 +19,38 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
   const [mensagemSucesso, setMensagemSucesso] = useState(false);
   const router = useRouter();
 
-  // STATES DA CALCULADORA
+  // === NOVOS ESTADOS DA CALCULADORA DE QUANTIDADE ===
+  const tipoPreco = service?.tipoPrecificacao || "UNIDADE";
+  const [quantidadeLivre, setQuantidadeLivre] = useState(1);
+  const [pacoteIdSelecionado, setPacoteIdSelecionado] = useState<string | number>("");
+
   const [opcoesSelecionadas, setOpcoesSelecionadas] = useState<any[]>([]);
   const [arquivoArte, setArquivoArte] = useState<File | null>(null);
 
+  // Garante que o primeiro pacote venha selecionado por padrão
+  useEffect(() => {
+    if (tipoPreco === "PACOTE" && service?.pacotes?.length > 0 && !pacoteIdSelecionado) {
+      setPacoteIdSelecionado(service.pacotes[0].id);
+    }
+  }, [service, tipoPreco, pacoteIdSelecionado]);
+
   if (!service) return null;
 
-  // Calcula o preço final em tempo real (Preço Base + Soma das Variações Escolhidas)
-  const precoTotal = service.precoBase + opcoesSelecionadas.reduce((soma, op) => soma + op.precoExtra, 0);
+  // === O NOVO CÉREBRO MATEMÁTICO ===
+  const somaVariacoes = opcoesSelecionadas.reduce((soma, op) => soma + op.precoExtra, 0);
+  let precoTotal = 0;
+  let textoQuantidade = "";
+
+  if (tipoPreco === "UNIDADE") {
+    // Unidade: Multiplica o valor do produto e dos acabamentos pela quantidade escolhida
+    precoTotal = ((service.precoBase || 0) + somaVariacoes) * quantidadeLivre;
+    textoQuantidade = `${quantidadeLivre} unidade(s)`;
+  } else {
+    // Pacote: Pega o preço do lote fechado e soma o valor dos acabamentos
+    const pacoteAtual = service.pacotes?.find((p: any) => String(p.id) === String(pacoteIdSelecionado)) || service.pacotes?.[0];
+    precoTotal = (pacoteAtual?.preco || 0) + somaVariacoes;
+    textoQuantidade = pacoteAtual ? `${pacoteAtual.quantidade} unidades (Pacote)` : "";
+  }
 
   const toggleOpcao = (variacao: any) => {
     const jaSelecionado = opcoesSelecionadas.find(op => op.id === variacao.id);
@@ -48,7 +72,6 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
     setCarregando(true);
 
     try {
-        // 1. Envia a arte (PDF/JPG) para o servidor primeiro, se o cliente anexou
         let urlArte = "";
         if (arquivoArte) {
             const envelope = new FormData();
@@ -58,13 +81,14 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
             urlArte = dadosUpload.url;
         }
 
-        // 2. Monta o pacote com o preço final e as escolhas do cliente
         const pacotePedido = {
-            descricao: `Pedido pelo Site: ${service.title}`,
+            // Agora o admin vê no painel exatamente a quantidade que o cliente escolheu!
+            descricao: `Pedido pelo Site: ${service.title} - ${textoQuantidade}`,
             valor: precoTotal,
             arquivoArte: urlArte || undefined,
             detalhes: {
-                // A MÁGICA ESTÁ AQUI: Agora mandamos o nome e o preço extra de cada item!
+                tipoPrecificacao: tipoPreco,
+                quantidadeEscolhida: tipoPreco === "UNIDADE" ? quantidadeLivre : textoQuantidade,
                 opcoesEscolhidas: opcoesSelecionadas.map(op => ({ 
                     nome: op.nome, 
                     preco: op.precoExtra 
@@ -96,7 +120,10 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
       <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm" onClick={closeModal}>
         <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-white w-full max-w-5xl rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col md:flex-row h-[90vh] md:h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
           
-          <button onClick={closeModal} className="absolute top-4 right-4 z-50 p-2 rounded-full transition-colors backdrop-blur-md text-slate-600 bg-white/60 hover:bg-slate-200 md:text-white md:bg-white/10 md:hover:bg-slate-100/20">
+          <button 
+            onClick={closeModal} 
+            className="absolute top-4 right-4 z-50 p-2 rounded-full transition-all text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-800 shadow-sm"
+          >
             <X size={24} weight="bold" />
           </button>
 
@@ -107,13 +134,7 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
                 {service.portfolioItems.map((item: any) => (
                     <SwiperSlide key={item.id} className="relative w-full h-full flex items-center justify-center">
                     <div className="relative w-full h-full p-6 md:p-12">
-                        <Image 
-                           src={item.image} 
-                           alt={item.title} 
-                           fill 
-                           className="object-contain drop-shadow-md md:drop-shadow-2xl" 
-                           unoptimized // <--- A MÁGICA ESTÁ AQUI TAMBÉM!
-                        />
+                        <Image src={item.image} alt={item.title} fill className="object-contain drop-shadow-md md:drop-shadow-2xl" unoptimized />
                     </div>
                     </SwiperSlide>
                 ))}
@@ -132,11 +153,11 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
 
           {/* COLUNA DIREITA (CONTEÚDO E CALCULADORA) */}
           <div className="flex-1 flex flex-col min-h-0 bg-white relative">
-            <div className="px-6 py-4 md:p-8 border-b border-slate-100 bg-white z-10">
+            <div className="px-6 py-4 md:p-8 pr-16 md:pr-16 border-b border-slate-100 bg-white z-10">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-2 text-yellow-600 font-semibold text-xs md:text-sm uppercase tracking-wider"><ImageIcon size={16} /><span>Detalhes</span></div>
                 
-                {/* PREÇO FINAL DINÂMICO! */}
+                {/* PREÇO FINAL DINÂMICO */}
                 <div className="bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full flex flex-col items-end">
                     <span className="text-[10px] uppercase font-bold tracking-wider leading-none">Total</span>
                     <span className="font-black text-lg leading-none">R$ {precoTotal.toFixed(2).replace('.', ',')}</span>
@@ -148,6 +169,55 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
             <div className="flex-1 overflow-y-auto px-6 py-4 md:p-8 space-y-6 md:space-y-8 scroll-smooth pb-32 md:pb-8">
               <p className="text-slate-600 leading-relaxed text-sm md:text-base">{service.description}</p>
 
+              {/* SELETOR DE QUANTIDADE OU PACOTE (A MÁGICA NOVA!) */}
+              <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                {tipoPreco === "UNIDADE" ? (
+                  <>
+                    <h3 className="font-bold text-slate-800 mb-4">Quantidade desejada:</h3>
+                    <div className="flex items-center gap-4">
+                      <button 
+                        type="button" 
+                        onClick={() => setQuantidadeLivre(Math.max(1, quantidadeLivre - 1))} 
+                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition"
+                      >
+                        -
+                      </button>
+                      
+                      <input 
+                        type="number" 
+                        min="1" 
+                        value={quantidadeLivre} 
+                        onChange={(e) => setQuantidadeLivre(Math.max(1, parseInt(e.target.value) || 1))} 
+                        className="w-24 p-2 text-center text-slate-800 border border-slate-300 rounded-lg font-bold outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white" 
+                      />
+                      
+                      <button 
+                        type="button" 
+                        onClick={() => setQuantidadeLivre(quantidadeLivre + 1)} 
+                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-bold text-slate-800 mb-4">Escolha a quantidade:</h3>
+                    <select 
+                      value={pacoteIdSelecionado} 
+                      onChange={(e) => setPacoteIdSelecionado(e.target.value)} 
+                      className="w-full p-3 text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white font-bold cursor-pointer transition-all hover:border-yellow-400"
+                    >
+                      {service.pacotes?.map((pacote: any) => (
+                        <option key={pacote.id} value={pacote.id} className="text-slate-800">
+                          {pacote.quantidade} unidades - R$ {pacote.preco.toFixed(2).replace('.', ',')}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
+              </div>
+
               {/* OPÇÕES ADICIONAIS (CHECKBOXES) */}
               {service.variacoes && service.variacoes.length > 0 && (
                   <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
@@ -156,7 +226,7 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
                           {service.variacoes.map((variacao: any) => (
                               <label key={variacao.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-yellow-400 hover:shadow-sm transition-all">
                                   <div className="flex items-center gap-3">
-                                      <input type="checkbox" className="w-5 h-5 accent-yellow-500 rounded" 
+                                      <input type="checkbox" className="w-5 h-5 accent-yellow-500 rounded cursor-pointer" 
                                         onChange={() => toggleOpcao(variacao)} 
                                         checked={!!opcoesSelecionadas.find(op => op.id === variacao.id)} 
                                       />
@@ -189,7 +259,7 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
                     <PaperPlaneTilt size={24} weight="fill" /><span>{carregando ? "A enviar..." : "Enviar Pedido"}</span>
                   </motion.button>
               )}
-              <a href={`https://api.whatsapp.com/send?phone=5531987090217&text=Olá!`} target="_blank" rel="noopener noreferrer" className="flex-none">
+              <a href={`https://api.whatsapp.com/send?phone=5531987090217&text=Olá! Gostaria de tirar uma dúvida.`} target="_blank" rel="noopener noreferrer" className="flex-none">
                 <motion.button whileTap={{ scale: 0.98 }} className="w-full sm:w-auto py-3 px-4 bg-[#25D366] hover:bg-[#1da851] text-white font-bold rounded-xl flex items-center justify-center shadow-lg"><WhatsappLogo size={24} weight="fill" /></motion.button>
               </a>
             </div>

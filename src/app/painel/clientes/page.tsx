@@ -14,6 +14,10 @@ export default function ClientesPage() {
   const router = useRouter();
   
   const [clientes, setClientes] = useState<Cliente[]>([]);
+
+  // Estado para a barra de pesquisa
+  const [buscaCliente, setBuscaCliente] = useState("");
+
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
@@ -99,13 +103,23 @@ export default function ClientesPage() {
     }
   };
 
+  // Filtra os clientes pelo nome, email ou telefone
+  const clientesFiltrados = clientes.filter((cliente) => {
+    const termo = buscaCliente.toLowerCase();
+    return (
+      cliente.nome.toLowerCase().includes(termo) ||
+      (cliente.email && cliente.email.toLowerCase().includes(termo)) ||
+      (cliente.telefone && cliente.telefone.includes(termo))
+    );
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 text-gray-800">
       <div className="max-w-4xl mx-auto space-y-8">
         
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-purple-600">Gestão de Clientes</h1>
-          <button onClick={() => router.push("/painel")} className="text-gray-500 hover:text-purple-500 underline">
+          <h1 className="text-3xl font-black text-[#262A2B]">Gestão de Clientes</h1>
+          <button onClick={() => router.push("/painel")} className="text-gray-500 hover:text-yellow-400 underline">
             Voltar ao Painel
           </button>
         </div>
@@ -117,7 +131,7 @@ export default function ClientesPage() {
             <input type="text" placeholder="Nome do Cliente *" value={nome} onChange={(e) => setNome(e.target.value)} required className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" />
             <input type="text" placeholder="Telefone *" value={telefone} onChange={(e) => setTelefone(e.target.value)} required className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" />
             <input type="email" placeholder="E-mail (Opcional)" value={email} onChange={(e) => setEmail(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-purple-500" />
-            <button type="submit" className="md:col-span-3 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">Salvar Cliente</button>
+            <button type="submit" className="md:col-span-3 px-6 py-3 bg-[#262A2B] text-white font-bold rounded-xl hover:bg-yellow-400 hover:text-[#262A2B] transition-all shadow-md">Salvar Cliente</button>
           </form>
           {mensagem && <p className="mt-4 text-center text-green-600 font-medium">{mensagem}</p>}
         </div>
@@ -125,12 +139,26 @@ export default function ClientesPage() {
         {/* Lista de Clientes */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Clientes Cadastrados</h2>
+
+          {/* BARRA DE PESQUISA DE CLIENTES */}
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex items-center">
+            <div className="flex-1 w-full relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+              <input 
+                type="text" 
+                placeholder="Pesquisar cliente por nome, e-mail ou telefone..." 
+                value={buscaCliente}
+                onChange={(e) => setBuscaCliente(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all text-[#262A2B]"
+              />
+            </div>
+          </div>
           
-          {clientes.length === 0 ? (
+          {clientesFiltrados.length === 0 ? (
             <p className="text-gray-500">Nenhum cliente cadastrado ainda.</p>
           ) : (
             <div className="space-y-3">
-              {clientes.map((cliente) => (
+              {clientesFiltrados.map((cliente) => (
                 <div key={cliente.id} className="p-4 border border-gray-100 rounded-lg flex justify-between items-center hover:bg-gray-50 transition">
                   <div>
                     <p className="font-bold text-gray-800">{cliente.nome}</p>

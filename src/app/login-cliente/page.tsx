@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { EnvelopeSimple, LockKey } from "@phosphor-icons/react";
+import { EnvelopeSimple, LockKey, Eye, EyeSlash } from "@phosphor-icons/react";
 
 export default function LoginClientePage() {
   const router = useRouter();
@@ -12,30 +12,43 @@ export default function LoginClientePage() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const fazerLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCarregando(true);
     setErro("");
+    setCarregando(true);
 
     try {
       const resposta = await fetch("http://localhost:3333/login-cliente", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha })
+        body: JSON.stringify({ email, senha }),
       });
 
       const dados = await resposta.json();
 
       if (resposta.ok) {
-        // Salvamos o token com um nome diferente para não misturar com o do seu sogro (Admin)
+        // 1. Salva o Token VIP na memória do navegador (É isso que o "Meus Pedidos" procura!)
         localStorage.setItem("token_cliente", dados.token);
+        
+        // Salva os dados do cliente (incluindo o isAdmin) para usar no Menu depois
+        localStorage.setItem("dados_cliente", JSON.stringify(dados.cliente));
+
+        // 3. A LINHA MÁGICA QUE SALVA O NOME PARA O CABEÇALHO LER!
         localStorage.setItem("nome_cliente", dados.cliente.nome);
         
-        // Joga o cliente de volta para a vitrine principal!
-        router.push("/");
+        // 2. O GUARDA DE TRÂNSITO (A Mágica do Redirecionamento)
+        if (dados.cliente.isAdmin === true) {
+          // Se for o chefão, manda pro Painel!
+          router.push("/painel/catalogo"); // (Se a sua rota principal do painel for outra, mude aqui)
+        } else {
+          // Se for cliente normal, manda pra Vitrine ou Meus Pedidos
+          router.push("/"); 
+        }
+        
       } else {
-        setErro(dados.error || "Erro ao fazer login.");
+        setErro(dados.error || "E-mail ou senha incorretos.");
       }
     } catch (error) {
       setErro("Erro de conexão com o servidor.");
@@ -77,22 +90,43 @@ export default function LoginClientePage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all bg-gray-50 focus:bg-white"
+                // ADICIONADO: text-slate-800
+                className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all bg-gray-50 focus:bg-white"
               />
             </div>
 
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <LockKey size={20} />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <LockKey size={20} />
+                </div>
+                
+                <input
+                  type={mostrarSenha ? "text" : "password"}
+                  placeholder="Digite sua Senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-12 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all"
+                />
+
+                {/* BOTÃO DO OLHINHO AQUI! */}
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-yellow-500 transition-colors"
+                >
+                  {mostrarSenha ? <EyeSlash size={22} /> : <Eye size={22} />}
+                </button>
               </div>
-              <input
-                type="password"
-                placeholder="Sua senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all bg-gray-50 focus:bg-white"
-              />
+
+            <div className="text-center mt-1">
+              <button 
+                type="button" 
+                onClick={() => router.push('/esqueci-senha')} 
+                className="text-sm font-bold text-gray-500 hover:text-yellow-500 transition-colors"
+              >
+                Esqueceu sua senha?
+              </button>
             </div>
 
             {erro && <p className="text-red-500 text-sm font-semibold text-center">{erro}</p>}

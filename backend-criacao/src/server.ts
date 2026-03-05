@@ -1,3 +1,10 @@
+import dotenv from 'dotenv';
+dotenv.config(); // Isso força o Node a ler o .env AGORA, antes de qualquer outra coisa
+
+// Só DEPOIS disso você importa as outras coisas, como o Prisma e o Express
+import { PrismaClient } from '@prisma/client';
+import express from 'express';
+
 import path from 'path';
 import multer from 'multer';
 import uploadConfig from './config/multer';
@@ -5,8 +12,7 @@ import cors from 'cors';
 import { verificarToken } from './middlewares/auth';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import express from 'express';
-import { PrismaClient } from '@prisma/client';// Importando o Prisma
+import nodemailer from 'nodemailer';
 
 const app = express();
 // Configura a pasta onde os arquivos vão ser salvos
@@ -51,7 +57,7 @@ app.get('/perfil', verificarToken, async (request, response) => {
 });
 
 app.post('/usuarios', async (request, response) => {
-  const { nome, email, senha } = request.body;
+  const { nome, descricao, precoBase, imagemUrl, imagensExtras, variacoes, tipoPrecificacao, pacotes } = request.body;
 
   try {
     // 1. Geramos um "salt" (um tempero aleatório) e depois o hash da senha
@@ -79,43 +85,93 @@ app.post('/usuarios', async (request, response) => {
 app.post('/login', async (request, response) => {
   const { email, senha } = request.body;
 
-  // 1. Buscamos o usuário no banco
-  const usuario = await prisma.usuario.findUnique({ where: { email } });
+  try {
+    // 1. Buscamos o usuário no banco
+    const usuario = await prisma.usuario.findUnique({ where: { email } });
 
-  if (!usuario) {
-    return response.status(401).json({ error: 'Usuário ou senha inválidos' });
+    if (!usuario) {
+      return response.status(401).json({ error: 'Usuário ou senha inválidos' });
+    }
+
+    // 2. Comparamos a senha digitada com o hash guardado
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+
+    if (!senhaValida) {
+      return response.status(401).json({ error: 'Usuário ou senha inválidos' });
+    }
+
+    // 3. Geramos o Token (a "chave de acesso") com a CHAVE UNIFICADA!
+    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+    const token = jwt.sign({ id: usuario.id }, chaveSecreta, { expiresIn: '1d' });
+
+    return response.json({ token });
+  } catch (error) {
+    console.error("ERRO NO LOGIN ADMIN:", error);
+    return response.status(500).json({ error: 'Erro interno no servidor' });
   }
-
-  // 2. Comparamos a senha digitada com o hash guardado
-  const senhaValida = await bcrypt.compare(senha, usuario.senha);
-
-  if (!senhaValida) {
-    return response.status(401).json({ error: 'Usuário ou senha inválidos' });
-  }
-
-  // 3. Geramos o Token (a "chave de acesso")
-  // O "segredo-do-token" deve ser uma string forte em um projeto real!
-  const token = jwt.sign({ id: usuario.id }, 'segredo-do-token', { expiresIn: '1d' });
-
-  return response.json({ token });
 });
 
 // ROTA PARA CRIAR UM CLIENTE (Protegida)
-app.post('/clientes', verificarToken, async (request, response) => {
-  const { nome, telefone, email } = request.body;
+app.post('/clientes', async (request, response) => {
+  const { 
+      nome, telefone, email, senha,
+      cep, logradouro, numero, complemento, bairro, cidade, estado 
+    } = request.body;
 
   try {
+    // 1. Criptografar a senha caso ela tenha sido enviada
+    const bcrypt = require('bcrypt'); // ou 'bcryptjs' dependendo do seu projeto
+    const senhaCriptografada = senha ? await bcrypt.hash(senha, 10) : null;
+
+    // 2. Criar o cliente com todos os campos novos
     const novoCliente = await prisma.cliente.create({
       data: {
         nome,
         telefone,
-        email // Como definimos no schema que é opcional, pode não ser enviado
+        email, 
+        senha: senhaCriptografada, // Salva a senha embaralhada!
+        
+        // === NOVOS CAMPOS DE ENDEREÇO ===
+        cep,
+        logradouro,
+        numero,
+        complemento,
+        bairro,
+        cidade,
+        estado
       }
     });
 
     return response.status(201).json(novoCliente);
   } catch (error) {
+    console.error("ERRO AO CRIAR CLIENTE:", error);
     return response.status(400).json({ error: 'Erro ao criar o cliente.' });
+  }
+});
+
+// =========================================================
+// ROTA: BUSCAR DADOS DO PERFIL (MINHA CONTA)
+// =========================================================
+app.get('/clientes/:id', verificarToken, async (request, response) => {
+  try {
+    const { id } = request.params;
+    
+    const cliente = await prisma.cliente.findUnique({
+      where: { id },
+      // Ocultamos a senha e o código de recuperação por segurança!
+      select: { 
+        id: true, nome: true, email: true, telefone: true, 
+        cep: true, logradouro: true, numero: true, complemento: true, 
+        bairro: true, cidade: true, estado: true 
+      }
+    });
+
+    if (!cliente) return response.status(404).json({ error: 'Cliente não encontrado' });
+    
+    return response.json(cliente);
+  } catch (error) {
+    console.error("ERRO AO BUSCAR PERFIL:", error);
+    return response.status(500).json({ error: 'Erro interno ao buscar dados.' });
   }
 });
 
@@ -131,6 +187,44 @@ app.get('/clientes', verificarToken, async (request, response) => {
     return response.json(clientes);
   } catch (error) {
     return response.status(500).json({ error: 'Erro ao procurar os clientes.' });
+  }
+});
+
+// =========================================================
+// ROTA: ATUALIZAR PERFIL DO CLIENTE (MINHA CONTA)
+// =========================================================
+app.put('/clientes/:id', async (request, response) => {
+  try {
+    const { id } = request.params;
+    
+    // Pegamos tudo que pode ser atualizado na tela de Minha Conta
+    const { 
+      nome, telefone, 
+      cep, logradouro, numero, complemento, bairro, cidade, estado 
+    } = request.body;
+
+    // Atualiza direto no banco de dados
+    const clienteAtualizado = await prisma.cliente.update({
+      where: { id },
+      data: {
+        nome,
+        telefone,
+        cep,
+        logradouro,
+        numero,
+        complemento,
+        bairro,
+        cidade,
+        estado
+      }
+    });
+
+    console.log(`[BACKEND] Perfil atualizado com sucesso: ${clienteAtualizado.nome}`);
+    return response.json({ message: 'Perfil atualizado com sucesso!', cliente: clienteAtualizado });
+
+  } catch (error) {
+    console.error("ERRO AO ATUALIZAR PERFIL:", error);
+    return response.status(500).json({ error: 'Erro interno ao atualizar os dados.' });
   }
 });
 
@@ -257,21 +351,19 @@ app.get('/metricas', verificarToken, async (request, response) => {
   }
 });
 
-// ROTA PARA O ADMIN CRIAR PRODUTOS COM VARIAÇÕES E GALERIA
 app.post('/produtos', async (request, response) => {
-  // Pegamos todos os dados novos que o frontend vai mandar
-  const { nome, descricao, precoBase, imagemUrl, imagensExtras, variacoes } = request.body;
-
   try {
-    const novoProduto = await prisma.produto.create({
+    const { nome, descricao, precoBase, imagemUrl, imagensExtras, variacoes, tipoPrecificacao, pacotes } = request.body;
+
+    const produto = await prisma.produto.create({
       data: {
         nome,
         descricao,
-        precoBase,
-        imagemUrl, // A foto principal de capa
-        variacoes, // O "superpoder" do Prisma salva o JSON direto!
-        
-        // Mágica do Prisma: Já cria as imagens extras na tabela vinculada!
+        precoBase: Number(precoBase) || 0,
+        tipoPrecificacao: tipoPrecificacao || "UNIDADE",
+        pacotes: pacotes || [], // Salva os milheiros como JSON
+        imagemUrl,
+        variacoes: variacoes || [], 
         imagens: {
           create: imagensExtras && imagensExtras.length > 0 
             ? imagensExtras.map((url: string) => ({ url })) 
@@ -280,10 +372,51 @@ app.post('/produtos', async (request, response) => {
       }
     });
 
-    return response.status(201).json(novoProduto);
+    console.log("[BACKEND] Produto CRIADO com sucesso!");
+    return response.status(201).json(produto);
   } catch (error) {
-    console.error("Erro ao criar produto:", error);
-    return response.status(400).json({ error: 'Erro ao criar o produto no banco de dados.' });
+    console.error("ERRO AO CRIAR PRODUTO:", error);
+    return response.status(500).json({ error: 'Erro interno ao criar produto.' });
+  }
+});
+
+// ROTA PARA ATUALIZAR UM PRODUTO COMPLETO (EDIÇÃO HÍBRIDA)
+app.put('/produtos/:id', async (request, response) => {
+  try {
+    const { id } = request.params;
+    const { nome, descricao, precoBase, imagemUrl, imagensExtras, variacoes, tipoPrecificacao, pacotes } = request.body;
+
+    const produtoExiste = await prisma.produto.findUnique({ where: { id } });
+    if (!produtoExiste) return response.status(404).json({ error: 'Produto não encontrado.' });
+
+    // Apaga as FOTOS EXTRAS antigas
+    await prisma.imagemProduto.deleteMany({
+      where: { produtoId: id }
+    });
+
+    const produtoAtualizado = await prisma.produto.update({
+      where: { id },
+      data: {
+        nome,
+        descricao,
+        precoBase: Number(precoBase) || 0,
+        tipoPrecificacao: tipoPrecificacao || "UNIDADE",
+        pacotes: pacotes || [],
+        imagemUrl,
+        variacoes: variacoes || [],
+        imagens: {
+          create: imagensExtras && imagensExtras.length > 0 
+            ? imagensExtras.map((url: string) => ({ url })) 
+            : []
+        }
+      }
+    });
+
+    console.log("[BACKEND] Produto ATUALIZADO com sucesso!");
+    return response.json(produtoAtualizado);
+  } catch (error) {
+    console.error("ERRO AO ATUALIZAR PRODUTO:", error);
+    return response.status(500).json({ error: 'Erro interno ao atualizar.' });
   }
 });
 
@@ -357,15 +490,28 @@ app.post('/login-cliente', async (request, response) => {
 
     // 3. Gera o Token VIP do cliente
     const { sign } = require('jsonwebtoken');
-    // ATENÇÃO: Use a mesma palavra secreta que você usou na rota de login do Admin!
-    const token = sign({ nome: cliente.nome }, 'sua_senha_super_secreta_aqui', {
-      subject: cliente.id,
-      expiresIn: '7d' // Cliente fica logado por 7 dias
-    });
+    
+    // A MÁGICA DA CHAVE IGUALADA:
+    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+    
+    const token = sign(
+      { 
+        id: cliente.id, 
+        nome: cliente.nome,
+        isAdmin: cliente.isAdmin // <-- Superpoder restaurado!
+      }, 
+      chaveSecreta, // <-- Agora usa a mesma chave do Leão de Chácara!
+      { expiresIn: '7d' } // Cliente fica logado por 7 dias
+    );
 
+    // 4. Devolve o token e os dados para o Frontend
     return response.json({ 
       token, 
-      cliente: { id: cliente.id, nome: cliente.nome } 
+      cliente: { 
+        id: cliente.id, 
+        nome: cliente.nome,
+        isAdmin: cliente.isAdmin // <-- Frontend precisa disso para o roteamento do Painel
+      } 
     });
 
   } catch (error) {
@@ -374,62 +520,69 @@ app.post('/login-cliente', async (request, response) => {
   }
 });
 
+// =========================================================
 // ROTA PARA O CLIENTE SOLICITAR ORÇAMENTO PELO SITE
-app.post('/vitrine/pedidos', async (request, response) => {
-  const authHeader = request.headers.authorization;
-  if (!authHeader) return response.status(401).json({ error: 'Sessão não iniciada.' });
-
-  const [, token] = authHeader.split(' ');
-
+// =========================================================
+app.post('/vitrine/pedidos', verificarToken, async (request, response) => {
   try {
-    const { verify } = require('jsonwebtoken');
-    const decoded = verify(token, 'sua_senha_super_secreta_aqui');
-    const clienteId = decoded.sub;
-
-    // AQUI ESTAVA O ERRO! Agora estamos pegando o arquivo e os detalhes:
+    // 1. Pegamos todos os dados preciosos que o Modal do Frontend enviou
     const { descricao, valor, arquivoArte, detalhes } = request.body;
 
+    // 2. Abrimos o Token com a CHAVE CERTA para descobrir de quem é o pedido
+    const authHeader = request.headers.authorization;
+    const token = authHeader.split(' ')[1];
+    const jwt = require('jsonwebtoken');
+    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+    
+    const decoded = jwt.verify(token, chaveSecreta);
+    const clienteId = decoded.id; // Agora pegamos o ID do lugar certinho!
+
+    // 3. Salvamos o pedido completo no banco de dados
     const novoPedido = await prisma.pedido.create({
       data: {
-        descricao,
-        valor,
-        clienteId,
-        status: 'ORÇAMENTO',
-        arquivoArte, // Salva o link do PDF no banco
-        detalhes     // Salva as opções (Couché, Verniz, etc) no banco
+        descricao: descricao,
+        valor: valor,
+        clienteId: clienteId,
+        status: 'ORÇAMENTO', // Já entra como orçamento pendente
+        arquivoArte: arquivoArte, // Salva o link do PDF/Arte
+        detalhes: detalhes       // Salva as opções extras escolhidas
       }
     });
 
+    console.log(`[SUCESSO] Pedido VIP recebido: ${descricao} | R$ ${valor}`);
     return response.status(201).json(novoPedido);
+
   } catch (error) {
-    return response.status(401).json({ error: 'Sessão inválida.' });
+    console.error("ERRO AO RECEBER PEDIDO DA VITRINE:", error);
+    return response.status(500).json({ error: 'Erro ao processar o pedido no servidor.' });
   }
 });
 
-// ROTA PARA O CLIENTE VER AS SUAS ENCOMENDAS (Área do Cliente)
-app.get('/meus-pedidos', async (request, response) => {
-  const authHeader = request.headers.authorization;
-  
-  if (!authHeader) {
-    return response.status(401).json({ error: 'Sessão não iniciada.' });
-  }
-
-  const [, token] = authHeader.split(' ');
-
+// =========================================================
+// ROTA: LISTAR PEDIDOS DO CLIENTE LOGADO (MEUS PEDIDOS)
+// =========================================================
+app.get('/meus-pedidos', verificarToken, async (request, response) => {
   try {
-    const { verify } = require('jsonwebtoken');
-    const decoded = verify(token, 'sua_senha_super_secreta_aqui'); // Usa a tua chave secreta
-    const clienteId = decoded.sub;
+    // 1. Extraímos o ID do cliente direto do token
+    const authHeader = request.headers.authorization;
+    const token = authHeader.split(' ')[1]; // Pega a parte depois do "Bearer "
+    
+    const jwt = require('jsonwebtoken');
+    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+    const decoded = jwt.verify(token, chaveSecreta);
+    
+    const clienteId = decoded.id; // O ID do cliente que está fazendo o pedido
 
-    // Vai à base de dados procurar os pedidos deste cliente específico
-    const meusPedidos = await prisma.pedido.findMany({
-      where: { clienteId },
-      orderBy: { criadoEm: 'desc' } // Mostra os mais recentes primeiro
+    // 2. Buscamos no banco apenas os pedidos DESTE cliente
+    const pedidos = await prisma.pedido.findMany({
+      where: { clienteId: clienteId },
+      orderBy: { criadoEm: 'desc' } // Mais novos primeiro
     });
 
-    return response.json(meusPedidos);
+    return response.json(pedidos);
   } catch (error) {
-    return response.status(401).json({ error: 'Sessão inválida ou expirada.' });
+    console.error("ERRO AO BUSCAR MEUS PEDIDOS:", error);
+    return response.status(500).json({ error: 'Erro ao buscar pedidos.' });
   }
 });
 
@@ -475,5 +628,165 @@ app.delete('/produtos/:id', async (request, response) => {
   } catch (error) {
     console.error("Erro ao deletar produto:", error);
     return response.status(400).json({ error: 'Erro ao deletar o produto.' });
+  }
+});
+
+// ROTA PARA ALIMENTAR OS GRÁFICOS DO DASHBOARD
+app.get('/dashboard/graficos', async (request, response) => {
+  try {
+    const pedidos = await prisma.pedido.findMany({
+      orderBy: { criadoEm: 'asc' } // Garante a ordem cronológica
+    });
+
+    // 1. LÓGICA DO GRÁFICO DE STATUS (Rosca)
+    const orcamentos = pedidos.filter(p => p.status === 'ORÇAMENTO').length;
+    const producao = pedidos.filter(p => p.status === 'PRODUÇÃO').length;
+    const prontos = pedidos.filter(p => p.status === 'PRONTO').length;
+
+    const dadosStatus = [
+      { nome: 'Orçamento', quantidade: orcamentos },
+      { nome: 'Em Produção', quantidade: producao },
+      { nome: 'Prontos', quantidade: prontos }
+    ];
+
+    // 2. LÓGICA DE PRODUTOS MAIS VENDIDOS (Barras)
+    // Agrupa as descrições para contar qual sai mais
+    const contagemProdutos: Record<string, number> = {};
+    pedidos.forEach(p => {
+      // Limpa o prefixo "Pedido pelo Site: " se houver, para o gráfico ficar limpo
+      const nomeProduto = p.descricao.replace('Pedido pelo Site: ', '').trim();
+      contagemProdutos[nomeProduto] = (contagemProdutos[nomeProduto] || 0) + 1;
+    });
+    
+    // Transforma em array, ordena do maior para o menor e pega os 4 top
+    const dadosProdutos = Object.entries(contagemProdutos)
+      .map(([nome, vendas]) => ({ nome, vendas }))
+      .sort((a, b) => b.vendas - a.vendas)
+      .slice(0, 4);
+
+    // 3. LÓGICA DE FATURAMENTO DOS ÚLTIMOS 7 DIAS (Linha)
+    const dadosFaturamento = [];
+    for (let i = 6; i >= 0; i--) {
+      const data = new Date();
+      data.setDate(data.getDate() - i);
+      
+      // Formata para "Seg", "Ter", etc.
+      const diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+      const dataComparacao = data.toDateString();
+
+      // Soma o valor apenas dos pedidos que estão PRONTOS neste dia específico
+      const faturamentoDoDia = pedidos
+        .filter(p => p.status === 'PRONTO' && new Date(p.criadoEm).toDateString() === dataComparacao)
+        .reduce((acc, p) => acc + p.valor, 0);
+
+      dadosFaturamento.push({ 
+        dia: diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1), // Deixa a primeira letra maiúscula
+        valor: faturamentoDoDia 
+      });
+    }
+
+    return response.json({ dadosStatus, dadosProdutos, dadosFaturamento });
+  } catch (error) {
+    console.error("Erro ao gerar gráficos:", error);
+    return response.status(500).json({ error: 'Erro ao gerar dados dos gráficos.' });
+  }
+});
+
+// =========================================================
+// ROTA 1: SOLICITAR RECUPERAÇÃO (GERA CÓDIGO E ENVIA EMAIL)
+// =========================================================
+app.post('/clientes/esqueci-senha', async (request, response) => {
+  try {
+    const { email } = request.body;
+
+    // 1. Verifica se o cliente existe
+    const cliente = await prisma.cliente.findUnique({ where: { email } });
+    if (!cliente) {
+      return response.status(404).json({ error: 'Nenhuma conta encontrada com este e-mail.' });
+    }
+
+    // 2. Gera um código de 6 dígitos aleatório
+    const codigoSecreto = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 3. Salva o código no banco de dados do cliente
+    await prisma.cliente.update({
+      where: { email },
+      data: { codigoRecuperacao: codigoSecreto }
+    });
+
+    console.log("DADOS QUE O NODE ESTÁ LENDO:");
+    console.log("Email:", process.env.EMAIL_USER);
+    console.log("Senha:", process.env.EMAIL_PASS);
+
+    // 4. Configura o Carteiro (Nodemailer) com os dados do seu .env
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // true para a porta 465
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // 5. Envia o e-mail para o cliente
+    await transporter.sendMail({
+      from: `"A Criação Gráfica" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Seu Código de Recuperação de Senha 🔐",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+          <h2>Olá, ${cliente.nome}!</h2>
+          <p>Você solicitou a recuperação de senha no site da <b>A Criação Gráfica</b>.</p>
+          <p>Seu código de segurança é:</p>
+          <h1 style="background: #f4f4f4; padding: 15px; letter-spacing: 5px; text-align: center; border-radius: 8px;">${codigoSecreto}</h1>
+          <p>Se você não solicitou isso, basta ignorar este e-mail.</p>
+        </div>
+      `,
+    });
+
+    console.log(`[BACKEND] Código ${codigoSecreto} enviado para ${email}`);
+    return response.json({ message: 'E-mail enviado com sucesso!' });
+
+  } catch (error) {
+    console.error("ERRO AO ENVIAR EMAIL DE RECUPERAÇÃO:", error);
+    return response.status(500).json({ error: 'Erro interno ao processar solicitação.' });
+  }
+});
+
+
+// =========================================================
+// ROTA 2: TROCAR A SENHA (VALIDA O CÓDIGO E SALVA NOVA SENHA)
+// =========================================================
+app.post('/clientes/resetar-senha', async (request, response) => {
+  try {
+    const { email, codigo, novaSenha } = request.body;
+
+    // 1. Busca o cliente para ver se o código bate
+    const cliente = await prisma.cliente.findUnique({ where: { email } });
+
+    if (!cliente || cliente.codigoRecuperacao !== codigo) {
+      return response.status(400).json({ error: 'Código inválido ou expirado!' });
+    }
+
+    // 2. CRIPTOGRAFA A NOVA SENHA ANTES DE SALVAR! 🔐
+    const salt = await bcrypt.genSalt(10);
+    const senhaCriptografada = await bcrypt.hash(novaSenha, salt);
+
+    // 3. Atualiza a senha (agora criptografada) e APAGA o código por segurança
+    await prisma.cliente.update({
+      where: { email },
+      data: { 
+        senha: senhaCriptografada, 
+        codigoRecuperacao: null
+      }
+    });
+
+    console.log(`[BACKEND] Senha alterada e criptografada com sucesso para ${email}`);
+    return response.json({ message: 'Senha alterada com sucesso!' });
+
+  } catch (error) {
+    console.error("ERRO AO RESETAR SENHA:", error);
+    return response.status(500).json({ error: 'Erro interno ao resetar senha.' });
   }
 });

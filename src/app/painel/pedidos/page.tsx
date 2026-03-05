@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { WhatsappLogo } from "@phosphor-icons/react";
+import { WhatsappLogo, Plus} from "@phosphor-icons/react";
 
 interface Cliente {
   id: string;
@@ -29,6 +29,10 @@ export default function PedidosPage() {
   
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]); 
+
+  // Estados para Busca e Filtros
+  const [termoBusca, setTermoBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("TODOS");
   
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
@@ -167,13 +171,24 @@ export default function PedidosPage() {
     return `https://api.whatsapp.com/send?phone=55${numeroLimpo}&text=${encodeURIComponent(mensagem)}`;
   };
 
+  // Filtra os pedidos com base no texto digitado (busca por nome do cliente ou descrição do pedido) e no status selecionado
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const matchBusca = 
+      pedido.descricao.toLowerCase().includes(termoBusca.toLowerCase()) ||
+      (pedido.cliente?.nome && pedido.cliente.nome.toLowerCase().includes(termoBusca.toLowerCase()));
+      
+    const matchStatus = filtroStatus === "TODOS" || pedido.status === filtroStatus;
+
+    return matchBusca && matchStatus;
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 text-gray-800">
       <div className="max-w-4xl mx-auto space-y-8">
         
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-blue-600">Pedidos & Orçamentos</h1>
-          <button onClick={() => router.push("/painel")} className="text-gray-500 hover:text-blue-500 underline">
+          <h1 className="text-3xl font-black text-[#262A2B]">Pedidos & Orçamentos</h1>
+          <button onClick={() => router.push("/painel")} className="text-gray-500 hover:text-yellow-400 underline">
             Voltar ao Painel
           </button>
         </div>
@@ -216,9 +231,13 @@ export default function PedidosPage() {
               ))}
             </select>
 
-            <button type="submit" className="md:col-span-2 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
-              Criar Orçamento
+            <button 
+               onClick={() => alert("Função de criar orçamento manual em breve!")} 
+               className="flex items-center gap-2 bg-[#262A2B] text-white px-5 py-3 rounded-xl font-bold hover:bg-yellow-400 hover:text-[#262A2B] transition-all shadow-md"
+            >
+               <Plus size={20} weight="bold" /> Criar Orçamento                                         
             </button>
+
           </form>
           {mensagem && <p className="mt-4 text-center text-green-600 font-medium">{mensagem}</p>}
         </div>
@@ -227,97 +246,131 @@ export default function PedidosPage() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Histórico de Pedidos</h2>
           
-          {pedidos.length === 0 ? (
+          {/* BARRA DE PESQUISA E FILTROS */}
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4 items-center">
+            
+            {/* Input de Busca */}
+            <div className="flex-1 w-full relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+              <input 
+                type="text" 
+                placeholder="Pesquisar por cliente ou nome do produto..." 
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all text-[#262A2B]"
+              />
+            </div>
+
+            {/* Select de Status */}
+            <div className="w-full md:w-64">
+              <select 
+                value={filtroStatus}
+                onChange={(e) => setFiltroStatus(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all text-[#262A2B] font-bold cursor-pointer"
+              >
+                <option value="TODOS">Todos os Status</option>
+                <option value="ORÇAMENTO">🟡 Orçamentos</option>
+                <option value="PRODUÇÃO">🔵 Em Produção</option>
+                <option value="PRONTO">🟢 Prontos / Entregues</option>
+              </select>
+            </div>
+
+          </div>
+          {pedidosFiltrados.length === 0 ? (
             <p className="text-gray-500">Nenhum pedido registrado ainda.</p>
           ) : (
             <div className="space-y-3">
-               {pedidos.map((pedido) => (
-                  <div key={pedido.id} className="p-4 border border-gray-100 rounded-lg bg-white shadow-sm hover:border-gray-200 transition">
-                     
-                     {/* Cabeçalho do Card: Descrição e Dados do Cliente */}
-                    <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
-                      <div>
-                        {/* TÍTULO E DATA/HORA */}
-                        <div className="flex flex-wrap items-center gap-3 mb-2">
-                          <p className="font-black text-lg text-gray-800 leading-none">{pedido.descricao}</p>
-                          {pedido.criadoEm && (
-                            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-md font-bold border border-gray-200" title="Data e hora do pedido">
-                              📅 {new Date(pedido.criadoEm).toLocaleDateString('pt-BR')} às {new Date(pedido.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          )}
+               {pedidosFiltrados.map((pedido) => (
+                  
+                    <div key={pedido.id} className="p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md hover:border-yellow-400 transition-all duration-300">
+                      
+                      {/* Cabeçalho do Card */}
+                      <div className="flex flex-col md:flex-row justify-between items-start mb-4 gap-4">
+                        
+                        {/* ADICIONADO: flex-1 e min-w-0 na div da esquerda */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-3 mb-2">
+                            {/* Título - ADICIONADO: break-words */}
+                            <p className="font-black text-xl text-[#262A2B] leading-none break-words">
+                              {pedido.descricao}
+                            </p>
+                            {pedido.criadoEm && (
+                              <span className="text-[10px] bg-gray-100 text-[#262A2B] px-2 py-1 rounded-md font-bold border border-gray-200 shrink-0" title="Data e hora do pedido">
+                                📅 {new Date(pedido.criadoEm).toLocaleDateString('pt-BR')} às {new Date(pedido.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Box de Contato do Cliente */}
+                          <div className="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm text-[#262A2B] space-y-1">
+                            <p><span className="font-bold">👤 Cliente:</span> {pedido.cliente?.nome}</p>
+                            {pedido.cliente?.telefone && (
+                               <p><span className="font-bold">📱 WhatsApp:</span> {pedido.cliente.telefone}</p>
+                            )}
+                            {pedido.cliente?.email && (
+                               <p><span className="font-bold">✉️ E-mail:</span> {pedido.cliente.email}</p>
+                            )}
+                          </div>
                         </div>
                         
-                        {/* Box de Contato do Cliente (mantenha o seu código aqui para baixo...) */}
-                        <div className="mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm text-gray-600 space-y-1">
-                          <p><span className="font-bold text-gray-700">👤 Cliente:</span> {pedido.cliente?.nome}</p>
-                          {pedido.cliente?.telefone && (
-                             <p><span className="font-bold text-gray-700">📱 WhatsApp:</span> {pedido.cliente.telefone}</p>
-                          )}
-                          {pedido.cliente?.email && (
-                             <p><span className="font-bold text-gray-700">✉️ E-mail:</span> {pedido.cliente.email}</p>
-                          )}
+                        {/* PREÇO TOTAL: ADICIONADO shrink-0 na div principal e whitespace-nowrap no texto do preço */}
+                        <div className="shrink-0 flex items-center gap-4 bg-yellow-50 px-5 py-3 rounded-xl border border-yellow-200">
+                          <div className="text-right">
+                            <p className="text-[10px] uppercase font-bold text-yellow-700 tracking-wider">Valor Total</p>
+                            <p className="font-black text-[#262A2B] text-xl whitespace-nowrap">R$ {pedido.valor.toFixed(2).replace('.', ',')}</p>
+                          </div>
+                          <div className="h-8 w-px bg-yellow-300 mx-2"></div>
+                          <button 
+                             onClick={() => deletarPedido(pedido.id)}
+                             className="text-red-400 hover:text-red-600 hover:bg-red-50 transition p-2 rounded-lg"
+                             title="Deletar orçamento"
+                          >
+                             🗑️
+                          </button>
                         </div>
                       </div>
-                      
-                      {/* Preço Total e Lixeira */}
-                      <div className="flex items-center gap-4 bg-green-50 px-4 py-2 rounded-lg border border-green-100">
-                        <div className="text-right">
-                          <p className="text-[10px] uppercase font-bold text-green-600 tracking-wider">Valor Total</p>
-                          <p className="font-black text-green-700 text-lg">R$ {pedido.valor.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <div className="h-8 w-px bg-green-200 mx-1"></div>
-                        <button 
-                           onClick={() => deletarPedido(pedido.id)}
-                           className="text-red-400 hover:text-red-600 transition bg-white p-2 rounded-md shadow-sm"
-                           title="Deletar orçamento"
-                        >
-                           🗑️
-                        </button>
+
+                      {/* Detalhes e PDF */}
+                      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center mt-4 pt-4 border-t border-gray-100">
+                        
+                        {/* Opções escolhidas */}
+                        {pedido.detalhes?.opcoesEscolhidas && pedido.detalhes.opcoesEscolhidas.length > 0 && (
+                          <div className="flex-1 w-full bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <p className="text-xs font-bold text-[#262A2B] uppercase tracking-wider mb-3 flex items-center gap-2">
+                               🛠️ Acabamentos Adicionais
+                            </p>
+                            <ul className="text-sm text-gray-700 space-y-2">
+                              {pedido.detalhes.opcoesEscolhidas.map((op: any, i: number) => {
+                                if (typeof op === 'string') {
+                                  return <li key={i} className="flex items-center gap-2"><span className="w-2 h-2 bg-yellow-400 rounded-full"></span> {op}</li>;
+                                }
+                                return (
+                                  <li key={i} className="flex justify-between items-center border-b border-gray-200 pb-1.5 last:border-0 last:pb-0">
+                                    <span className="flex items-center gap-2"><span className="w-2 h-2 bg-yellow-400 rounded-full shadow-sm"></span> {op.nome}</span>
+                                    {/* Preço do adicional com a cor da gráfica */}
+                                    <span className="font-bold text-[#262A2B] text-xs bg-yellow-100 px-2 py-0.5 rounded-md">+ R$ {op.preco.toFixed(2).replace('.', ',')}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* BOTÃO DO PDF: Saindo do azul genérico e assumindo a identidade da Gráfica */}
+                        {pedido.arquivoArte && (
+                          <a 
+                            href={pedido.arquivoArte} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 bg-[#262A2B] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-yellow-400 hover:text-[#262A2B] transition-all shadow-md w-full md:w-auto flex-shrink-0"
+                          >
+                            📄 Baixar Arte Enviada
+                          </a>
+                        )}
                       </div>
-                    </div>
 
-                    {/* AQUI ENTRA A MÁGICA: Detalhes com Preço e PDF */}
-                    <div className="flex flex-col md:flex-row gap-6 items-start md:items-center mt-3 pt-4 border-t border-gray-100">
-                      
-                      {/* Opções escolhidas via JSON */}
-                      {pedido.detalhes?.opcoesEscolhidas && pedido.detalhes.opcoesEscolhidas.length > 0 && (
-                        <div className="flex-1 w-full bg-slate-50 p-3 rounded-lg border border-slate-200">
-                          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                             🛠️ Acabamentos Adicionais
-                          </p>
-                          <ul className="text-sm text-slate-700 space-y-1.5">
-                            {pedido.detalhes.opcoesEscolhidas.map((op: any, i: number) => {
-                              // Verifica se é o pedido antigo (só texto) ou o novo (com preço)
-                              if (typeof op === 'string') {
-                                return <li key={i} className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span> {op}</li>;
-                              }
-                              // Formato novo rico em detalhes!
-                              return (
-                                <li key={i} className="flex justify-between items-center border-b border-slate-100 pb-1 last:border-0 last:pb-0">
-                                  <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span> {op.nome}</span>
-                                  <span className="font-bold text-green-600 text-xs">+ R$ {op.preco.toFixed(2).replace('.', ',')}</span>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Link para Download do PDF */}
-                      {pedido.arquivoArte && (
-                        <a 
-                          href={pedido.arquivoArte} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-100 transition border border-blue-200 w-full md:w-auto flex-shrink-0"
-                        >
-                          📄 Baixar Arte Enviada
-                        </a>
-                      )}
-                    </div>
-
-                    {/* Status e Botão WhatsApp */}
-                    <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                      {/* Status */}
+                      <div className="mt-5 flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
                       
                       <select
                         value={pedido.status}
