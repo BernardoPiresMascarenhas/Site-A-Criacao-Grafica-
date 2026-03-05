@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { X, WhatsappLogo, CaretLeft, CaretRight, Image as ImageIcon, PaperPlaneTilt, CheckCircle, FilePdf } from '@phosphor-icons/react';
+import { X, WhatsappLogo, CaretLeft, CaretRight, Image as ImageIcon, PaperPlaneTilt, CheckCircle, FilePdf, ShoppingCart } from '@phosphor-icons/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCart } from '@/contexts/CartContext';
+
 
 interface ModalProps { service: any; closeModal: () => void; }
 
@@ -18,6 +20,7 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
   const [carregando, setCarregando] = useState(false);
   const [mensagemSucesso, setMensagemSucesso] = useState(false);
   const router = useRouter();
+  const { addToCart } = useCart();
 
   // === NOVOS ESTADOS DA CALCULADORA DE QUANTIDADE ===
   const tipoPreco = service?.tipoPrecificacao || "UNIDADE";
@@ -61,18 +64,12 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
     }
   };
 
-  const solicitarOrcamento = async () => {
-    const token = localStorage.getItem("token_cliente");
-    if (!token) {
-        alert("Para solicitar online, inicie a sua sessão ou crie uma conta!");
-        router.push("/login-cliente");
-        return;
-    }
-
+  const adicionarAoCarrinho = async () => {
     setCarregando(true);
 
     try {
         let urlArte = "";
+        // Se o cliente anexou a arte, nós fazemos o upload AGORA, para o carrinho já guardar o link pronto!
         if (arquivoArte) {
             const envelope = new FormData();
             envelope.append("file", arquivoArte);
@@ -81,35 +78,31 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
             urlArte = dadosUpload.url;
         }
 
-        const pacotePedido = {
-            // Agora o admin vê no painel exatamente a quantidade que o cliente escolheu!
-            descricao: `Pedido pelo Site: ${service.title} - ${textoQuantidade}`,
-            valor: precoTotal,
-            arquivoArte: urlArte || undefined,
-            detalhes: {
-                tipoPrecificacao: tipoPreco,
-                quantidadeEscolhida: tipoPreco === "UNIDADE" ? quantidadeLivre : textoQuantidade,
-                opcoesEscolhidas: opcoesSelecionadas.map(op => ({ 
-                    nome: op.nome, 
-                    preco: op.precoExtra 
-                }))
-            }
+        // Criamos o "pacotinho" de dados que vai para a memória do navegador
+        const novoItemNoCarrinho = {
+            idCart: Date.now().toString(), // Gera um ID único na hora
+            produtoNome: service.title,
+            quantidadeTexto: tipoPreco === "UNIDADE" ? `${quantidadeLivre} unidade(s)` : textoQuantidade,
+            preco: precoTotal,
+            opcoesExtras: opcoesSelecionadas.map(op => ({ 
+                nome: op.nome, 
+                preco: op.precoExtra 
+            })),
+            arteUrl: urlArte || undefined,
         };
 
-        const resposta = await fetch("http://localhost:3333/vitrine/pedidos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(pacotePedido)
-        });
+        // Salva no Contexto (que automaticamente salva no localStorage)
+        addToCart(novoItemNoCarrinho);
 
-        if (resposta.ok) {
-            setMensagemSucesso(true);
-            setTimeout(() => { setMensagemSucesso(false); closeModal(); }, 3000);
-        } else {
-            alert("Erro ao enviar o pedido. Tente novamente.");
-        }
+        setMensagemSucesso(true);
+        // Fecha o modal rapidinho para ele continuar comprando
+        setTimeout(() => { 
+            setMensagemSucesso(false); 
+            closeModal(); 
+        }, 1500); 
+
     } catch (error) {
-        alert("Erro de conexão com o servidor.");
+        alert("Erro ao processar o arquivo. Tente novamente.");
     } finally {
         setCarregando(false);
     }
@@ -252,11 +245,17 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
             <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] z-20 absolute bottom-0 w-full flex flex-col sm:flex-row gap-3">
               {mensagemSucesso ? (
                   <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="flex-1 py-3 px-6 bg-green-100 text-green-700 font-bold text-lg rounded-xl flex items-center justify-center gap-2 border border-green-300">
-                    <CheckCircle size={24} weight="fill" /><span>Pedido Enviado!</span>
+                    <CheckCircle size={24} weight="fill" /><span>Adicionado ao Carrinho!</span>
                   </motion.div>
               ) : (
-                  <motion.button whileTap={{ scale: 0.98 }} onClick={solicitarOrcamento} disabled={carregando} className="flex-1 py-3 px-6 bg-[#262A2B] hover:bg-yellow-400 hover:text-black text-white font-bold text-lg rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50">
-                    <PaperPlaneTilt size={24} weight="fill" /><span>{carregando ? "A enviar..." : "Enviar Pedido"}</span>
+                  <motion.button 
+                    whileTap={{ scale: 0.98 }} 
+                    onClick={adicionarAoCarrinho} 
+                    disabled={carregando} 
+                    className="flex-1 py-3 px-6 bg-yellow-400 hover:bg-yellow-500 text-[#262A2B] font-black text-lg rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
+                  >
+                    <ShoppingCart size={24} weight="bold" />
+                    <span>{carregando ? "Processando..." : "Adicionar ao Carrinho"}</span>
                   </motion.button>
               )}
               <a href={`https://api.whatsapp.com/send?phone=5531987090217&text=Olá! Gostaria de tirar uma dúvida.`} target="_blank" rel="noopener noreferrer" className="flex-none">
