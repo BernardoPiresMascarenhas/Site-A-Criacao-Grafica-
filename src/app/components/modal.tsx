@@ -111,17 +111,19 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm" onClick={closeModal}>
-        <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-white w-full max-w-5xl rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col md:flex-row h-[90vh] md:h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        
+        {/* MÁGICA 1: h-[100dvh] e rounded-none no Mobile (Tela Cheia), e h-[85vh] com bordas no PC */}
+        <motion.div initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-white w-full max-w-5xl rounded-none md:rounded-2xl shadow-2xl flex flex-col md:flex-row h-[100dvh] md:h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
           
           <button 
             onClick={closeModal} 
-            className="absolute top-4 right-4 z-50 p-2 rounded-full transition-all text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-800 shadow-sm"
+            className="absolute top-4 right-4 z-50 p-2 rounded-full transition-all text-slate-800 bg-white/80 backdrop-blur-md hover:bg-slate-200 shadow-sm"
           >
             <X size={24} weight="bold" />
           </button>
 
-          {/* COLUNA ESQUERDA (IMAGENS) */}
-          <div className="relative w-full md:w-5/12 h-64 md:h-full bg-slate-50 md:bg-slate-900 flex flex-col justify-center flex-shrink-0 border-b md:border-b-0 border-slate-100">
+          {/* COLUNA ESQUERDA (IMAGENS) - Ajustei a altura para ficar bonito no celular */}
+          <div className="relative w-full md:w-5/12 h-[35vh] md:h-full bg-slate-50 md:bg-slate-900 flex flex-col justify-center flex-shrink-0 border-b md:border-b-0 border-slate-100">
             {service.portfolioItems && service.portfolioItems.length > 0 ? (
                 <Swiper modules={[Navigation, Pagination, A11y, Autoplay]} loop={service.portfolioItems.length > 1} spaceBetween={0} slidesPerView={1} className="w-full h-full" onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)} navigation={service.portfolioItems.length > 1 ? { nextEl: '.custom-next', prevEl: '.custom-prev' } : false} pagination={service.portfolioItems.length > 1 ? { clickable: true, bulletActiveClass: '!bg-yellow-400 opacity-100', bulletClass: 'swiper-pagination-bullet !bg-slate-300 md:!bg-white/50 !opacity-100' } : false}>
                 {service.portfolioItems.map((item: any) => (
@@ -145,12 +147,13 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
           </div>
 
           {/* COLUNA DIREITA (CONTEÚDO E CALCULADORA) */}
-          <div className="flex-1 flex flex-col min-h-0 bg-white relative">
-            <div className="px-6 py-4 md:p-8 pr-16 md:pr-16 border-b border-slate-100 bg-white z-10">
+          <div className="flex-1 flex flex-col min-h-0 bg-white">
+            
+            {/* CABEÇALHO DO PRODUTO (Fixo no topo da coluna) */}
+            <div className="px-6 py-4 md:p-8 pr-16 md:pr-16 border-b border-slate-100 bg-white shrink-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <div className="flex items-center gap-2 text-yellow-600 font-semibold text-xs md:text-sm uppercase tracking-wider"><ImageIcon size={16} /><span>Detalhes</span></div>
                 
-                {/* PREÇO FINAL DINÂMICO */}
                 <div className="bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full flex flex-col items-end">
                     <span className="text-[10px] uppercase font-bold tracking-wider leading-none">Total</span>
                     <span className="font-black text-lg leading-none">R$ {precoTotal.toFixed(2).replace('.', ',')}</span>
@@ -159,48 +162,25 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
               <h2 className="text-xl md:text-3xl font-bold text-slate-800 leading-tight">{service.title}</h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-4 md:p-8 space-y-6 md:space-y-8 scroll-smooth pb-32 md:pb-8">
+            {/* MÁGICA 2: A área do meio agora é a única que dá scroll! */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 md:p-8 space-y-6 md:space-y-8 scroll-smooth">
               <p className="text-slate-600 leading-relaxed text-sm md:text-base">{service.description}</p>
 
-              {/* SELETOR DE QUANTIDADE OU PACOTE (A MÁGICA NOVA!) */}
+              {/* SELETOR DE QUANTIDADE OU PACOTE */}
               <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
                 {tipoPreco === "UNIDADE" ? (
                   <>
                     <h3 className="font-bold text-slate-800 mb-4">Quantidade desejada:</h3>
                     <div className="flex items-center gap-4">
-                      <button 
-                        type="button" 
-                        onClick={() => setQuantidadeLivre(Math.max(1, quantidadeLivre - 1))} 
-                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition"
-                      >
-                        -
-                      </button>
-                      
-                      <input 
-                        type="number" 
-                        min="1" 
-                        value={quantidadeLivre} 
-                        onChange={(e) => setQuantidadeLivre(Math.max(1, parseInt(e.target.value) || 1))} 
-                        className="w-24 p-2 text-center text-slate-800 border border-slate-300 rounded-lg font-bold outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white" 
-                      />
-                      
-                      <button 
-                        type="button" 
-                        onClick={() => setQuantidadeLivre(quantidadeLivre + 1)} 
-                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition"
-                      >
-                        +
-                      </button>
+                      <button type="button" onClick={() => setQuantidadeLivre(Math.max(1, quantidadeLivre - 1))} className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition">-</button>
+                      <input type="number" min="1" value={quantidadeLivre} onChange={(e) => setQuantidadeLivre(Math.max(1, parseInt(e.target.value) || 1))} className="w-24 p-2 text-center text-slate-800 border border-slate-300 rounded-lg font-bold outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white" />
+                      <button type="button" onClick={() => setQuantidadeLivre(quantidadeLivre + 1)} className="w-10 h-10 flex items-center justify-center bg-white text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold text-xl transition">+</button>
                     </div>
                   </>
                 ) : (
                   <>
                     <h3 className="font-bold text-slate-800 mb-4">Escolha a quantidade:</h3>
-                    <select 
-                      value={pacoteIdSelecionado} 
-                      onChange={(e) => setPacoteIdSelecionado(e.target.value)} 
-                      className="w-full p-3 text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white font-bold cursor-pointer transition-all hover:border-yellow-400"
-                    >
+                    <select value={pacoteIdSelecionado} onChange={(e) => setPacoteIdSelecionado(e.target.value)} className="w-full p-3 text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white font-bold cursor-pointer transition-all hover:border-yellow-400">
                       {service.pacotes?.map((pacote: any) => (
                         <option key={pacote.id} value={pacote.id} className="text-slate-800">
                           {pacote.quantidade} unidades - R$ {pacote.preco.toFixed(2).replace('.', ',')}
@@ -242,26 +222,22 @@ const Modal: React.FC<ModalProps> = ({ service, closeModal }) => {
 
             </div>
 
-            <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] z-20 absolute bottom-0 w-full flex flex-col sm:flex-row gap-3">
+            {/* RODAPÉ E BOTÕES (Fixo na parte inferior, tiramos o absolute) */}
+            <div className="p-4 bg-white border-t border-slate-100 shadow-[0_-5px_15px_rgba(0,0,0,0.02)] shrink-0 flex flex-col sm:flex-row gap-3">
               {mensagemSucesso ? (
                   <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="flex-1 py-3 px-6 bg-green-100 text-green-700 font-bold text-lg rounded-xl flex items-center justify-center gap-2 border border-green-300">
-                    <CheckCircle size={24} weight="fill" /><span>Adicionado ao Carrinho!</span>
+                    <CheckCircle size={24} weight="fill" /><span>Adicionado!</span>
                   </motion.div>
               ) : (
-                  <motion.button 
-                    whileTap={{ scale: 0.98 }} 
-                    onClick={adicionarAoCarrinho} 
-                    disabled={carregando} 
-                    className="flex-1 py-3 px-6 bg-yellow-400 hover:bg-yellow-500 text-[#262A2B] font-black text-lg rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
-                  >
-                    <ShoppingCart size={24} weight="bold" />
-                    <span>{carregando ? "Processando..." : "Adicionar ao Carrinho"}</span>
+                  <motion.button whileTap={{ scale: 0.98 }} onClick={adicionarAoCarrinho} disabled={carregando} className="flex-1 py-3 px-6 bg-yellow-400 hover:bg-yellow-500 text-[#262A2B] font-black text-lg rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50">
+                    <ShoppingCart size={24} weight="bold" /><span>{carregando ? "Processando..." : "Adicionar ao Carrinho"}</span>
                   </motion.button>
               )}
               <a href={`https://api.whatsapp.com/send?phone=5531987090217&text=Olá! Gostaria de tirar uma dúvida.`} target="_blank" rel="noopener noreferrer" className="flex-none">
                 <motion.button whileTap={{ scale: 0.98 }} className="w-full sm:w-auto py-3 px-4 bg-[#25D366] hover:bg-[#1da851] text-white font-bold rounded-xl flex items-center justify-center shadow-lg"><WhatsappLogo size={24} weight="fill" /></motion.button>
               </a>
             </div>
+            
           </div>
         </motion.div>
       </div>

@@ -27,25 +27,36 @@ const port = 3333;
 
 app.use(express.json());
 
-// Nossa rota de teste que já estava aqui
+// =========================================================
+// ROTA: BUSCAR DADOS DO PERFIL (ADMIN E CLIENTES)
+// =========================================================
 app.get('/perfil', verificarToken, async (request, response) => {
-  // 1. Pegamos o token que o middleware já validou
-  const authHeader = request.headers.authorization;
-  const token = authHeader!.split(' ')[1];
+  try {
+    // 1. Descobre quem é o usuário abrindo o Token
+    const authHeader = request.headers.authorization;
+    const token = authHeader.split(' ')[1];
+    const jwt = require('jsonwebtoken');
+    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+    const decoded = jwt.verify(token, chaveSecreta);
+    
+    // 2. Busca na tabela CLIENTE (onde o Renato e os clientes normais moram agora!)
+    const perfil = await prisma.cliente.findUnique({
+      where: { id: decoded.id }
+    });
 
-  // 2. Lemos o ID que guardamos dentro do token lá na hora do login
-  const payload = jwt.decode(token) as { id: string };
+    if (!perfil) {
+      return response.status(404).json({ error: 'Perfil não encontrado no banco.' });
+    }
 
-  // 3. Buscamos o dono desse ID no banco de dados com o Prisma
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: payload.id }
-  });
+    // 3. Tira a senha do pacote por segurança antes de mandar pro Frontend
+    const { senha, ...dadosSeguros } = perfil;
+    
+    return response.json(dadosSeguros);
 
-  // 4. Devolvemos o nome e o email para o frontend (nunca a senha!)
-  return response.json({
-    nome: usuario?.nome,
-    email: usuario?.email
-  });
+  } catch (error) {
+    console.error("ERRO AO BUSCAR PERFIL:", error);
+    return response.status(500).json({ error: 'Erro interno no servidor.' });
+  }
 });
 
 // ROTA PROTEGIDA
@@ -81,71 +92,120 @@ app.post('/usuarios', async (request, response) => {
   }
 });
 
-// ROTA DE LOGIN
-app.post('/login', async (request, response) => {
-  const { email, senha } = request.body;
+
+
+// =========================================================
+// ROTA 1: CRIAR CONTA E ENVIAR CÓDIGO POR E-MAIL
+// =========================================================
+app.post('/cadastro-solicitar', async (request, response) => {
+  // 👇 AGORA SIM! Puxando todos os dados que vêm do Frontend:
+  const { nome, email, senha, telefone, cep, logradouro, numero, complemento, bairro, cidade, estado } = request.body;
+  
+  const bcrypt = require('bcrypt');
+  const nodemailer = require('nodemailer');
 
   try {
-    // 1. Buscamos o usuário no banco
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
-
-    if (!usuario) {
-      return response.status(401).json({ error: 'Usuário ou senha inválidos' });
+    // 1. Verifica se o e-mail já existe
+    const clienteExistente = await prisma.cliente.findUnique({ where: { email } });
+    
+    if (clienteExistente) {
+      if (clienteExistente.contaAtiva) {
+        return response.status(400).json({ error: 'Este e-mail já está em uso.' });
+      }
+      // Se a conta existe mas não está ativa, a gente apaga para ele tentar de novo
+      await prisma.cliente.delete({ where: { email } });
     }
 
-    // 2. Comparamos a senha digitada com o hash guardado
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    // 2. Gera a senha protegida e o código de 6 dígitos
+    const senhaCriptografada = await bcrypt.hash(senha, 10);
+    const codigoGerado = Math.floor(100000 + Math.random() * 900000).toString(); // Ex: "582910"
 
-    if (!senhaValida) {
-      return response.status(401).json({ error: 'Usuário ou senha inválidos' });
-    }
-
-    // 3. Geramos o Token (a "chave de acesso") com a CHAVE UNIFICADA!
-    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
-    const token = jwt.sign({ id: usuario.id }, chaveSecreta, { expiresIn: '1d' });
-
-    return response.json({ token });
-  } catch (error) {
-    console.error("ERRO NO LOGIN ADMIN:", error);
-    return response.status(500).json({ error: 'Erro interno no servidor' });
-  }
-});
-
-// ROTA PARA CRIAR UM CLIENTE (Protegida)
-app.post('/clientes', async (request, response) => {
-  const { 
-      nome, telefone, email, senha,
-      cep, logradouro, numero, complemento, bairro, cidade, estado 
-    } = request.body;
-
-  try {
-    // 1. Criptografar a senha caso ela tenha sido enviada
-    const bcrypt = require('bcrypt'); // ou 'bcryptjs' dependendo do seu projeto
-    const senhaCriptografada = senha ? await bcrypt.hash(senha, 10) : null;
-
-    // 2. Criar o cliente com todos os campos novos
-    const novoCliente = await prisma.cliente.create({
+    // 3. Salva no banco como INATIVO
+    await prisma.cliente.create({
       data: {
         nome,
+        email,
+        senha: senhaCriptografada,
         telefone,
-        email, 
-        senha: senhaCriptografada, // Salva a senha embaralhada!
-        
-        // === NOVOS CAMPOS DE ENDEREÇO ===
-        cep,
-        logradouro,
-        numero,
-        complemento,
-        bairro,
-        cidade,
-        estado
+        cep, logradouro, numero, complemento, bairro, cidade, estado, 
+        contaAtiva: false,
+        codigoVerificacao: codigoGerado
       }
     });
 
-    return response.status(201).json(novoCliente);
+    // 4. Dispara o E-mail (Ajuste o user e pass com o e-mail real da gráfica)
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com", // Ou o SMTP da sua hospedagem de e-mail
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER || "seu-email@gmail.com",
+        pass: process.env.EMAIL_PASS || "sua-senha-de-app" 
+      }
+    });
+
+    const mailOptions = {
+      from: '"A Criação Gráfica" <seu-email@gmail.com>',
+      to: email,
+      subject: "Seu código de verificação 🚀",
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+          <h2>Olá, ${nome}!</h2>
+          <p>Falta pouco para você acessar o nosso sistema.</p>
+          <p>Seu código de verificação é:</p>
+          <h1 style="color: #ca8a04; letter-spacing: 5px; background: #fef08a; padding: 10px; border-radius: 8px; display: inline-block;">
+            ${codigoGerado}
+          </h1>
+          <p>Copie e cole esse código na tela de cadastro.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return response.json({ message: 'Código enviado com sucesso!' });
+
   } catch (error) {
-    console.error("ERRO AO CRIAR CLIENTE:", error);
-    return response.status(400).json({ error: 'Erro ao criar o cliente.' });
+    console.error("ERRO NO CADASTRO:", error);
+    return response.status(500).json({ error: 'Erro ao gerar o cadastro.' });
+  }
+});
+
+// =========================================================
+// ROTA 2: VERIFICAR O CÓDIGO E LIBERAR O ACESSO
+// =========================================================
+app.post('/cadastro-validar', async (request, response) => {
+  const { email, codigo } = request.body;
+  const jwt = require('jsonwebtoken');
+  const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+
+  try {
+    const cliente = await prisma.cliente.findUnique({ where: { email } });
+
+    if (!cliente) return response.status(404).json({ error: 'Cliente não encontrado.' });
+    if (cliente.contaAtiva) return response.status(400).json({ error: 'Conta já está ativa. Faça login.' });
+    if (cliente.codigoVerificacao !== codigo) return response.status(400).json({ error: 'Código inválido. Tente novamente.' });
+
+    // Se acertou o código, ativamos a conta e limpamos o código velho!
+    const clienteAtivo = await prisma.cliente.update({
+      where: { email },
+      data: { contaAtiva: true, codigoVerificacao: null }
+    });
+
+    // Já gera o Token VIP para ele não precisar digitar a senha de novo!
+    const token = jwt.sign(
+      { id: clienteAtivo.id, isAdmin: clienteAtivo.isAdmin }, 
+      chaveSecreta, 
+      { expiresIn: '1d' }
+    );
+    
+    return response.json({
+      token,
+      cliente: { id: clienteAtivo.id, nome: clienteAtivo.nome, isAdmin: clienteAtivo.isAdmin } 
+    });
+
+  } catch (error) {
+    return response.status(500).json({ error: 'Erro ao validar o código.' });
   }
 });
 
@@ -191,40 +251,32 @@ app.get('/clientes', verificarToken, async (request, response) => {
 });
 
 // =========================================================
-// ROTA: ATUALIZAR PERFIL DO CLIENTE (MINHA CONTA)
+// ROTA: ATUALIZAR DADOS DO CLIENTE (MINHA CONTA E PAINEL)
 // =========================================================
 app.put('/clientes/:id', async (request, response) => {
-  try {
-    const { id } = request.params;
-    
-    // Pegamos tudo que pode ser atualizado na tela de Minha Conta
-    const { 
-      nome, telefone, 
-      cep, logradouro, numero, complemento, bairro, cidade, estado 
-    } = request.body;
+  const { id } = request.params;
+  const { nome, telefone, cep, logradouro, numero, complemento, bairro, cidade, estado } = request.body;
 
-    // Atualiza direto no banco de dados
+  try {
     const clienteAtualizado = await prisma.cliente.update({
       where: { id },
-      data: {
-        nome,
-        telefone,
-        cep,
-        logradouro,
-        numero,
-        complemento,
-        bairro,
-        cidade,
-        estado
+      data: { 
+        nome, 
+        telefone, 
+        cep, 
+        logradouro, 
+        numero, 
+        complemento, 
+        bairro, 
+        cidade, 
+        estado 
       }
     });
 
-    console.log(`[BACKEND] Perfil atualizado com sucesso: ${clienteAtualizado.nome}`);
-    return response.json({ message: 'Perfil atualizado com sucesso!', cliente: clienteAtualizado });
-
+    return response.json(clienteAtualizado);
   } catch (error) {
-    console.error("ERRO AO ATUALIZAR PERFIL:", error);
-    return response.status(500).json({ error: 'Erro interno ao atualizar os dados.' });
+    console.error("ERRO AO ATUALIZAR CLIENTE:", error);
+    return response.status(500).json({ error: 'Erro ao atualizar dados.' });
   }
 });
 
@@ -468,55 +520,47 @@ app.post('/cadastro', async (request, response) => {
   }
 });
 
-app.post('/login-cliente', async (request, response) => {
+// =========================================================
+// ROTA: LOGIN UNIFICADO DEFINITIVO (Usando apenas a tabela Cliente)
+// =========================================================
+app.post('/login-unificado', async (request, response) => {
   const { email, senha } = request.body;
+  const jwt = require('jsonwebtoken');
+  const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
+  const bcrypt = require('bcrypt');
 
   try {
-    // 1. Procura o cliente pelo e-mail
-    const cliente = await prisma.cliente.findFirst({ where: { email } });
+    // Busca na tabela Cliente (onde todo mundo está agora!)
+    const usuario = await prisma.cliente.findUnique({ where: { email } });
     
-    // Se não achar o cliente ou se ele for um cliente antigo sem senha
-    if (!cliente || !cliente.senha) {
-      return response.status(401).json({ error: 'E-mail ou senha incorretos.' });
+    if (!usuario) {
+      return response.status(401).json({ error: 'E-mail não encontrado.' });
     }
 
-    // 2. Compara a senha digitada com a criptografada no banco
-    const { compare } = require('bcryptjs');
-    const senhaValida = await compare(senha, cliente.senha);
+    // Verifica se a senha bate com a criptografia
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) return response.status(401).json({ error: 'Senha incorreta.' });
 
-    if (!senhaValida) {
-      return response.status(401).json({ error: 'E-mail ou senha incorretos.' });
-    }
-
-    // 3. Gera o Token VIP do cliente
-    const { sign } = require('jsonwebtoken');
-    
-    // A MÁGICA DA CHAVE IGUALADA:
-    const chaveSecreta = process.env.JWT_SECRET || 'minha_chave_super_secreta_123';
-    
-    const token = sign(
-      { 
-        id: cliente.id, 
-        nome: cliente.nome,
-        isAdmin: cliente.isAdmin // <-- Superpoder restaurado!
-      }, 
-      chaveSecreta, // <-- Agora usa a mesma chave do Leão de Chácara!
-      { expiresIn: '7d' } // Cliente fica logado por 7 dias
+    // Gera a chave de acesso (Token)
+    const token = jwt.sign(
+      { id: usuario.id, isAdmin: usuario.isAdmin }, 
+      chaveSecreta, 
+      { expiresIn: '1d' }
     );
-
-    // 4. Devolve o token e os dados para o Frontend
-    return response.json({ 
-      token, 
+    
+    // Devolve para o Frontend quem é a pessoa que logou
+    return response.json({
+      token,
       cliente: { 
-        id: cliente.id, 
-        nome: cliente.nome,
-        isAdmin: cliente.isAdmin // <-- Frontend precisa disso para o roteamento do Painel
+        id: usuario.id,
+        nome: usuario.nome, 
+        isAdmin: usuario.isAdmin // Aqui ele avisa se é o Chefão ou Cliente Normal!
       } 
     });
 
   } catch (error) {
     console.error("ERRO NO LOGIN:", error);
-    return response.status(500).json({ error: 'Erro interno ao fazer login.' });
+    return response.status(500).json({ error: 'Erro interno no servidor.' });
   }
 });
 

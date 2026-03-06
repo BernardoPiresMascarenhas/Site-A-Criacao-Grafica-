@@ -20,7 +20,7 @@ export default function LoginClientePage() {
     setCarregando(true);
 
     try {
-      const resposta = await fetch("http://localhost:3333/login-cliente", {
+      const resposta = await fetch("http://localhost:3333/login-unificado", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha }),
@@ -41,7 +41,7 @@ export default function LoginClientePage() {
         // 2. O GUARDA DE TRÂNSITO (A Mágica do Redirecionamento)
         if (dados.cliente.isAdmin === true) {
           // Se for o chefão, manda pro Painel!
-          router.push("/painel/catalogo"); // (Se a sua rota principal do painel for outra, mude aqui)
+          router.push("/painel"); 
         } else {
           // Se for cliente normal, manda pra Vitrine ou Meus Pedidos
           router.push("/"); 

@@ -62,20 +62,20 @@ export default function PainelPage() {
   
   useEffect(() => {
     const carregarPainel = async () => {
-      const token = localStorage.getItem("token");
+      // 1. ATUALIZADO: Procurando a chave nova!
+      const token = localStorage.getItem("token_cliente");
 
       if (!token) {
-        router.push("/login");
+        // 2. ATUALIZADO: Mandando para a tela de login correta
+        router.push("/login-cliente");
         return;
       }
 
       try {
-        // Busca o Perfil
         const resPerfil = await fetch("http://localhost:3333/perfil", {
           headers: { "Authorization": `Bearer ${token}` }
         });
 
-        // Busca as Métricas
         const resMetricas = await fetch("http://localhost:3333/metricas", {
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -85,11 +85,12 @@ export default function PainelPage() {
           const dadosMetricas = await resMetricas.json();
           
           setNomeUsuario(dadosPerfil.nome); 
-          setMetricas(dadosMetricas); // Salva os números na tela
+          setMetricas(dadosMetricas); 
           setAutorizado(true);
         } else {
-          localStorage.removeItem("token");
-          router.push("/login");
+          // 3. ATUALIZADO: Limpando a chave certa e mandando pro lugar certo
+          localStorage.removeItem("token_cliente");
+          router.push("/login-cliente");
         }
       } catch (error) {
         console.error("Erro ao carregar painel:", error);
@@ -99,9 +100,12 @@ export default function PainelPage() {
     carregarPainel();
   }, [router]);
 
+  // 4. ATUALIZADO: Limpando tudo do sistema novo na hora de sair
   const fazerLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    localStorage.removeItem("token_cliente");
+    localStorage.removeItem("nome_cliente");
+    localStorage.removeItem("dados_cliente");
+    router.push("/login-cliente");
   };
 
   if (!autorizado) {

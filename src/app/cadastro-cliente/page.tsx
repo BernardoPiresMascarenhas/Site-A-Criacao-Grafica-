@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, EnvelopeSimple, Phone, LockKey, MapPin, House, Hash, ArrowLeft } from "@phosphor-icons/react";
+import { User, EnvelopeSimple, Phone, LockKey, MapPin, House, Hash, ArrowLeft, Key } from "@phosphor-icons/react";
 
 export default function CadastroClientePage() {
   const router = useRouter();
+
+  // Controle de Tela (1 = Formulário, 2 = Código de Verificação)
+  const [etapa, setEtapa] = useState<1 | 2>(1);
+  const [codigoInserido, setCodigoInserido] = useState("");
 
   // Estados dos Dados Pessoais
   const [nome, setNome] = useState("");
@@ -26,12 +30,11 @@ export default function CadastroClientePage() {
   const [erro, setErro] = useState("");
 
   // ==========================================
-  // BUSCA DE CEP AUTOMÁTICA (Mágica acontecendo)
+  // BUSCA DE CEP AUTOMÁTICA
   // ==========================================
   const buscarCep = async (cepBuscado: string) => {
-    // Limpa a formatação (deixa só os números)
     const cepLimpo = cepBuscado.replace(/\D/g, '');
-    setCep(cepBuscado); // Atualiza o input
+    setCep(cepBuscado);
 
     if (cepLimpo.length === 8) {
       try {
@@ -43,7 +46,6 @@ export default function CadastroClientePage() {
           setBairro(dados.bairro);
           setCidade(dados.localidade);
           setEstado(dados.uf);
-          // O foco vai automaticamente para o campo "Número" na vida real, mas aqui já preenchemos!
         }
       } catch (error) {
         console.error("Erro ao buscar CEP", error);
@@ -52,16 +54,15 @@ export default function CadastroClientePage() {
   };
 
   // ==========================================
-  // FUNÇÃO DE SALVAR O CLIENTE NO BACKEND
+  // ETAPA 1: SALVAR INATIVO E ENVIAR E-MAIL
   // ==========================================
-  const fazerCadastro = async (e: React.FormEvent) => {
+  const solicitarCadastro = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
     setCarregando(true);
 
     try {
-      // Ajuste a URL abaixo se a sua rota de cadastro no server.ts tiver outro nome
-      const resposta = await fetch("http://localhost:3333/clientes", {
+      const resposta = await fetch("http://localhost:3333/cadastro-solicitar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,10 +74,46 @@ export default function CadastroClientePage() {
       const dados = await resposta.json();
 
       if (resposta.ok) {
-        // Redireciona para o login após criar a conta com sucesso!
-        router.push("/login-cliente");
+        // Sucesso! Muda para a tela 2
+        setEtapa(2);
       } else {
-        setErro(dados.error || "Erro ao criar conta. Verifique os dados.");
+        setErro(dados.error || "Erro ao processar cadastro. Verifique os dados.");
+      }
+    } catch (error) {
+      setErro("Erro de conexão com o servidor.");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  // ==========================================
+  // ETAPA 2: VALIDAR O CÓDIGO E LOGAR O CLIENTE
+  // ==========================================
+  const validarCodigo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    try {
+      const resposta = await fetch("http://localhost:3333/cadastro-validar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, codigo: codigoInserido }),
+      });
+
+      const dados = await resposta.json();
+
+      if (resposta.ok) {
+        // Se a validação deu certo, o backend já devolve o token!
+        // Fazemos o login automático dele aqui:
+        localStorage.setItem("token_cliente", dados.token);
+        localStorage.setItem("dados_cliente", JSON.stringify(dados.cliente));
+        localStorage.setItem("nome_cliente", dados.cliente.nome);
+        
+        // Joga ele direto para a loja!
+        router.push("/");
+      } else {
+        setErro(dados.error || "Código inválido. Tente novamente.");
       }
     } catch (error) {
       setErro("Erro de conexão com o servidor.");
@@ -89,100 +126,161 @@ export default function CadastroClientePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4 py-10">
       <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         
-        {/* Cabeçalho */}
+        {/* Cabeçalho (Muda o texto dependendo da etapa) */}
         <div className="bg-[#262A2B] p-8 text-center relative">
           <button 
-            onClick={() => router.push('/login-cliente')}
+            onClick={() => etapa === 2 ? setEtapa(1) : router.push('/login-cliente')}
             className="absolute left-6 top-8 text-gray-400 hover:text-white transition-colors"
-            title="Voltar para o Login"
+            title="Voltar"
           >
             <ArrowLeft size={24} weight="bold" />
           </button>
-          <h1 className="text-2xl font-black text-white mt-2">Criar sua Conta</h1>
-          <p className="text-gray-400 text-sm mt-2">Preencha seus dados para fazer pedidos na gráfica.</p>
+          
+          {etapa === 1 ? (
+            <>
+              <h1 className="text-2xl font-black text-white mt-2">Criar sua Conta</h1>
+              <p className="text-gray-400 text-sm mt-2">Preencha seus dados para fazer pedidos na gráfica.</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-black text-white mt-2">Verifique seu E-mail</h1>
+              <p className="text-gray-400 text-sm mt-2">Enviamos um código de 6 dígitos para <strong className="text-yellow-400">{email}</strong></p>
+            </>
+          )}
         </div>
 
-        <form onSubmit={fazerCadastro} className="p-8 space-y-8">
+        {/* ============================================== */}
+        {/* RENDERIZAÇÃO CONDICIONAL: TELA 1 ou TELA 2 */}
+        {/* ============================================== */}
+        
+        {etapa === 1 ? (
           
-          {/* SESSÃO 1: DADOS PESSOAIS */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-[#262A2B] border-b pb-2">Dados Pessoais</h2>
+          <form onSubmit={solicitarCadastro} className="p-8 space-y-8">
+            {/* SESSÃO 1: DADOS PESSOAIS */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-[#262A2B] border-b pb-2">Dados Pessoais</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><User size={20} /></div>
+                  <input type="text" placeholder="Seu Nome Completo" value={nome} onChange={(e) => setNome(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Phone size={20} /></div>
+                  <input type="text" placeholder="Telefone / WhatsApp" value={telefone} onChange={(e) => setTelefone(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><EnvelopeSimple size={20} /></div>
+                  <input type="email" placeholder="Seu E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><LockKey size={20} /></div>
+                  <input type="password" placeholder="Crie uma Senha" value={senha} onChange={(e) => setSenha(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+              </div>
+            </div>
+
+            {/* SESSÃO 2: ENDEREÇO DE ENTREGA */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-[#262A2B] border-b pb-2">Endereço de Entrega</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative md:col-span-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><MapPin size={20} /></div>
+                  <input type="text" placeholder="CEP" value={cep} onChange={(e) => buscarCep(e.target.value)} maxLength={9} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all font-bold" />
+                </div>
+
+                <div className="relative md:col-span-2">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><House size={20} /></div>
+                  <input type="text" placeholder="Rua / Avenida" value={logradouro} onChange={(e) => setLogradouro(e.target.value)} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="relative md:col-span-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Hash size={20} /></div>
+                  <input type="text" placeholder="Número" value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+
+                <div className="relative md:col-span-3">
+                  <input type="text" placeholder="Complemento (Apto, Bloco... opcional)" value={complemento} onChange={(e) => setComplemento(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative">
+                  <input type="text" placeholder="Bairro" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+                <div className="relative">
+                  <input type="text" placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
+                </div>
+                <div className="relative">
+                  <input type="text" placeholder="UF (Ex: MG)" value={estado} onChange={(e) => setEstado(e.target.value)} maxLength={2} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all uppercase" />
+                </div>
+              </div>
+            </div>
+
+            {erro && <p className="text-red-500 text-sm font-semibold text-center">{erro}</p>}
+
+            <button
+              type="submit"
+              disabled={carregando}
+              className="w-full bg-yellow-400 text-[#262A2B] py-4 rounded-xl font-black text-lg hover:bg-yellow-500 transition-all shadow-md disabled:opacity-70 mt-4"
+            >
+              {carregando ? "Enviando Código..." : "Continuar"}
+            </button>
+          </form>
+
+        ) : (
+
+          /* ============================================== */
+          /* TELA 2: DIGITAR O CÓDIGO                       */
+          /* ============================================== */
+          <form onSubmit={validarCodigo} className="p-8 space-y-6 flex flex-col items-center">
+            <div className="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-2">
+              <Key size={40} weight="duotone" />
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><User size={20} /></div>
-                <input type="text" placeholder="Seu Nome Completo" value={nome} onChange={(e) => setNome(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
+            <p className="text-gray-600 text-center max-w-sm">
+              Acesse a caixa de entrada do seu e-mail e digite o código de 6 números que acabamos de te enviar.
+            </p>
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Phone size={20} /></div>
-                <input type="text" placeholder="Telefone / WhatsApp" value={telefone} onChange={(e) => setTelefone(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-            </div>
+            <input 
+              type="text" 
+              placeholder="000000" 
+              maxLength={6}
+              value={codigoInserido} 
+              onChange={(e) => setCodigoInserido(e.target.value.replace(/\D/g, ''))} 
+              required 
+              className="w-48 text-center text-4xl tracking-widest py-4 text-slate-800 border-2 border-gray-200 rounded-xl focus:border-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all font-black" 
+            />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><EnvelopeSimple size={20} /></div>
-                <input type="email" placeholder="Seu E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
+            {erro && <p className="text-red-500 text-sm font-semibold text-center">{erro}</p>}
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><LockKey size={20} /></div>
-                <input type="password" placeholder="Crie uma Senha" value={senha} onChange={(e) => setSenha(e.target.value)} required className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-            </div>
-          </div>
-
-          {/* SESSÃO 2: ENDEREÇO DE ENTREGA */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-[#262A2B] border-b pb-2">Endereço de Entrega</h2>
+            <button
+              type="submit"
+              disabled={carregando || codigoInserido.length < 6}
+              className="w-full max-w-sm bg-[#262A2B] text-white py-4 rounded-xl font-black text-lg hover:bg-yellow-400 hover:text-[#262A2B] transition-all shadow-md disabled:opacity-70 mt-4"
+            >
+              {carregando ? "Validando..." : "Confirmar e Entrar"}
+            </button>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative md:col-span-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><MapPin size={20} /></div>
-                <input type="text" placeholder="CEP" value={cep} onChange={(e) => buscarCep(e.target.value)} maxLength={9} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all font-bold" />
-              </div>
+            <button 
+              type="button"
+              onClick={solicitarCadastro}
+              className="text-sm font-bold text-gray-500 hover:text-yellow-600 transition-colors mt-2"
+            >
+              Não recebeu? Reenviar código
+            </button>
+          </form>
 
-              <div className="relative md:col-span-2">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><House size={20} /></div>
-                <input type="text" placeholder="Rua / Avenida" value={logradouro} onChange={(e) => setLogradouro(e.target.value)} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-            </div>
+        )}
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="relative md:col-span-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Hash size={20} /></div>
-                <input type="text" placeholder="Número" value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full pl-10 pr-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-
-              <div className="relative md:col-span-3">
-                <input type="text" placeholder="Complemento (Apto, Bloco... opcional)" value={complemento} onChange={(e) => setComplemento(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <input type="text" placeholder="Bairro" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-              <div className="relative">
-                <input type="text" placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all" />
-              </div>
-              <div className="relative">
-                <input type="text" placeholder="UF (Ex: MG)" value={estado} onChange={(e) => setEstado(e.target.value)} maxLength={2} className="w-full px-4 py-3 text-slate-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none bg-gray-50 focus:bg-white transition-all uppercase" />
-              </div>
-            </div>
-          </div>
-
-          {erro && <p className="text-red-500 text-sm font-semibold text-center">{erro}</p>}
-
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full bg-yellow-400 text-[#262A2B] py-4 rounded-xl font-black text-lg hover:bg-yellow-500 transition-all shadow-md disabled:opacity-70 mt-4"
-          >
-            {carregando ? "Criando Conta..." : "Finalizar Cadastro"}
-          </button>
-        </form>
       </div>
     </div>
   );

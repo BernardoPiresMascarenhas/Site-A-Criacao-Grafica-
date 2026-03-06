@@ -38,16 +38,18 @@ export default function MinhaContaPage() {
     }
 
     setToken(tokenSalvo);
-    const clienteId = JSON.parse(dadosSalvos).id;
-    setId(clienteId);
+    
 
     try {
-      const resposta = await fetch(`http://localhost:3333/clientes/${clienteId}`, {
+      // 1. MUDANÇA AQUI: Apontando para a Rota Universal Nova!
+      const resposta = await fetch(`http://localhost:3333/perfil`, {
         headers: { "Authorization": `Bearer ${tokenSalvo}` }
       });
 
       if (resposta.ok) {
         const dados = await resposta.json();
+
+        setId(dados.id);
         setNome(dados.nome || "");
         setTelefone(dados.telefone || "");
         setEmail(dados.email || "");
@@ -59,7 +61,6 @@ export default function MinhaContaPage() {
         setCidade(dados.cidade || "");
         setEstado(dados.estado || "");
       } else {
-        // AGORA O SISTEMA AVISA SE ALGO DER ERRADO!
         setMensagem({ texto: `Erro ao buscar dados no servidor (Código ${resposta.status}). Tente relogar.`, tipo: "erro" });
       }
     } catch (error) {
@@ -98,6 +99,7 @@ export default function MinhaContaPage() {
     setMensagem({ texto: "", tipo: "" });
 
     try {
+      // 2. MANTIDO: Essa rota de atualizar (PUT) geralmente continua sendo /clientes/:id no backend
       const resposta = await fetch(`http://localhost:3333/clientes/${id}`, {
         method: "PUT",
         headers: { 

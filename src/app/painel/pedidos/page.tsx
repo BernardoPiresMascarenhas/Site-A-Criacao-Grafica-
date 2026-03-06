@@ -39,9 +39,9 @@ export default function PedidosPage() {
   const [mensagem, setMensagem] = useState("");
 
   const carregarDados = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_cliente");
     if (!token) {
-      router.push("/login");
+      router.push("/login-cliente");
       return;
     }
 
@@ -69,7 +69,7 @@ export default function PedidosPage() {
   const cadastrarPedido = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensagem("Salvando orçamento...");
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_cliente");
 
     try {
       const resposta = await fetch("http://localhost:3333/pedidos", {
@@ -101,7 +101,7 @@ export default function PedidosPage() {
   };
 
   const alterarStatus = async (pedidoId: string, novoStatus: string) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_cliente");
     
     try {
       const resposta = await fetch(`http://localhost:3333/pedidos/${pedidoId}/status`, {
@@ -127,7 +127,7 @@ export default function PedidosPage() {
     const confirmacao = window.confirm("Tem certeza que deseja apagar este orçamento permanentemente?");
     if (!confirmacao) return; 
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_cliente");
     
     try {
       const resposta = await fetch(`http://localhost:3333/pedidos/${pedidoId}`, {
